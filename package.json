@@ -1,0 +1,14 @@
+{
+  "name": "shatelland-upload-center-advanced-features-userscript",
+  "version": "0.0.0beta",
+  "main": "src/index.js",
+  "scripts": {
+    "start-development": "webpack-dev-server --port 5005 --bail --content-base src/extra",
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "webpack": "^2.2.1",
+    "webpack-dev-server": "^2.4.1",
+    "open-browser-webpack-plugin": "0.0.5"
+  }
+}
