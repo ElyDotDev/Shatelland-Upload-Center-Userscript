@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shatelland Upload Center Advanced Features
 // @namespace    http://allii.ir/
-// @version      3.2.4
+// @version      3.2.5
 // @description  Add new and advanced features to Shatelland upload center
 // @author       Alireza Dabiri Nejad | alireza.dabirinejad@live.com | http://allii.ir
 // @include      http*://*shatelland.com/upload*
@@ -9,115 +9,119 @@
 // @grant        none
 // ==/UserScript==
 
-(function () {
+(function ()
+{
     'use strict';
-    
-    const ShatellandAdvancedFeaturesMain = function () {
+
+    const ShatellandAdvancedFeaturesMain = function ()
+    {
         console.log('Defining constants & variables.');
         /**
          * Leecher item ids list key in LocalStorage
          * @type {string}
          */
         const LEECHER_ITEMS_LIST_KEY = 'leecher_items';
-        
+
         /**
          * Leecher queue item id list key in LocalStorage
          * @type {string}
          */
         const LEECHER_ITEMS_QUEUE_LIST_KEY = 'leecher_items_queue';
-        
+
         /**
          * Leecher server id
          * @type {string}
          */
         const LEECHER_SERVER_ID_KEY = 'leecher_server_id';
-        
+
         /**
          * File status of leecher
          * @type {{NOT_SUBMITTED: number, SUBMIT_ERROR: number, SUBMIT_SUCCESS: number}}
          */
         const LEECH_FILE_STATUS = {
-            NOT_SUBMITTED: 1, //SUBMIT_ERROR: 2,
+            NOT_SUBMITTED: 1,
+            //SUBMIT_ERROR: 2,
             SUBMIT_SUCCESS: 3
         };
-        
+
         /**
          * Is FileReader supported in current browser?
          * @type {boolean}
          */
         let isFileReaderSupported = false;
-        
+
         /**
          * Is current page url contains www.?
          * @type {string}
          */
         let requestUrlPrefix = '';
-        
+
         /**
          * Is leecher queue being submitted?
          * @type {boolean}
          */
         let isSubmittingLeecherQueue = false;
-        
+
         /**
          * All the items in leecher.
          * @type {Array}
          */
         let leecherItemsList = [];
-        
+
         /**
          * Items not submitted to be leeched and are in submitting queue.
          * @type {Array}
          */
         let leecherItemsQueueList = [];
-        
+
         /**
          * List of direct download links.
          * @type {Array}
          */
         let directDownloadLinksList = [];
-        
+
         /**
          * Leecher Server Id
          * @type {string}
          */
         let leecherServerId = 'dl1';
-        
+
         /**
          * Shatelland Leech Servers
          * @type {{dl1: {text: string, address: string, status: number}, dl3: {text: string, address: string, status: number}}}
          */
         const shatellandLeecherServers = {
             dl1: {
-                text: 'DL1',
+                text: 'سرور 1',
                 address: 'https://dl1.shatelland.com/api/Leech',
                 status: 0
             },
             dl3: {
-                text: 'DL3',
-                address: 'http://dl3.shatelland.com/api/Leech',
+                text: 'سرور 3',
+                address: 'https://dl3.shatelland.com/api/Leech',
                 status: 0
-            }
+            },
+       
         };
-        
+
         /**
          * HTML for line separated urls leech button.
          * @type {string}
          */
         const lineSeparatedUrlsLeechButtonHTML = `<a id="line_separated_urls_leech_button" class="btn btn-block">انتقال گروهی لیست فایل</a>`;
-        
+
         /**
          * HTML for internet download manager (IDM) exported text file to leech button.
          * @type {string}
          */
         const idmExportAsTextToLeechButtonHTML = `<a id="idm_export_as_text_to_leech_button" class="btn btn-block" style="direction: rtl">انتقال گروهی خروجی IDM</a>`;
-        
+
         /**
          * Manage leech items list button HTML
          * @type {string}
          */
         const manageLeechItemsListButtonHTML = `<a id="manage_leech_items_list_button">مدیریت فهرست ریموت</a>`;
-        
+
         /**
          *  HTML for line separated urls leech modal.
          * @type {string}
@@ -145,7 +149,7 @@
                 </div>
             </div>
         `;
-        
+
         /**
          *  HTML for download manager (IDM) exported text file to leech modal.
          * @type {string}
@@ -175,7 +179,7 @@
                 </div>
             </div>
         `;
-        
+
         /**
          * HTML for manage leech items list modal.
          */
@@ -208,19 +212,19 @@
                 </div>
             </div>
         `;
-        
+
         /**
          * HTML for direct download selected items button.
          * @type {string}
          */
         const directDownloadSelectedItemsButtonHtml = '<button id="direct_download_selected_items" class="btn btn-info"  data-original-title="" title=""><i class="glyphicon glyphicon-download"></i></button>';
-        
+
         /**
          * HTML for direct download link of selected items button.
          * @type {string}
          */
         const directDownloadLinkOfSelectedItemsButtonHtml = '<button id="direct_download_link_of_selected_items" class="btn btn-info"  data-original-title="" title=""><i class="glyphicon glyphicon-list"></i></button>';
-        
+
         /**
          *  HTML for line separated urls leech modal.
          * @type {string}
@@ -266,37 +270,37 @@
                 </div>
             </div>
         `;
-        
+
         /**
          * HTML for refresh file manager button.
          * @type {string}
          */
         const refreshFileManagerButtonHtml = '<button id="refresh_file_manager" class="btn btn-info"  data-original-title="" title=""><i class="glyphicon glyphicon-refresh"></i></button>';
-        
+
         /**
          * HTML for share Folder page direct download of all files.
          * @type {string}
          */
         const shareFolderDirectDownloadAllFilesHTML = `<button id="sharefolder_direct_download_of_all_files_button" class="btn btn-info"  data-original-title="" title=""><i class="glyphicon glyphicon-download"></i> دانلود مستقیم تمام فایل ها</button>`;
-        
+
         /**
          * HTML for share Folder page direct download of all files.
          * @type {string}
          */
         const shareFolderDirectDownloadAllFilesAsLinkHTML = `<button id="sharefolder_direct_download_of_all_files_as_link_button" class="btn btn-info"  data-original-title="" title=""><i class="glyphicon glyphicon-list"></i> لینک مستقیم تمام فایل ها</button>`;
-        
+
         /**
          * HTML for share Folder page direct download of all files.
          * @type {string}
          */
         const shareFolderDirectDownloadLinkOfItemLinkHTML = `<a href="#" class="btn btn-success direct-download-item">دانلود مستقیم</a>`;
-        
+
         /**
          * Extra leecher manager button HTML
          * @type {string}
          */
         const extraLeecherManagerButtonHTML = `<a id="extra_leecher_manager_button" href="#">لیچر</a>`;
-        
+
         /**
          *  HTML for Extra leecher manager modal.
          * @type {string}
@@ -338,40 +342,148 @@
                 </div>
             </div>
         `;
-        
+
         /**
          * Leecher Servers select and status
          * @type {string}
          */
-        const leecherServersSelectAndStatusHTML = `<div id="leecher_servers_select_wrapper"  class="btn-group" style="direction: ltr" data-toggle="buttons">انتخاب سرور</div>`;
-        
+        const leecherServersSelectAndStatusHTML = `<div id="leecher_servers_select_wrapper"  class="btn-group" style="direction: ltr" data-toggle="buttons"></div>`;
+
         /**
          * Setup all ajax requests.
          */
-        $.ajaxSetup({ xhrFields: { withCredentials: true } });
-        
+        $.ajaxSetup({xhrFields: {withCredentials: true}});
+
         /**
          * Load Store.js
          *
          * Store.js used as a LocalStorage wrapper to use LocalStorage.
          */
         console.log('Loading Store.js');
-        $.getScript('https://cdnjs.cloudflare.com/ajax/libs/store.js/1.3.20/store.min.js', function () {
+        $.getScript('https://cdnjs.cloudflare.com/ajax/libs/store.js/1.3.20/store.min.js', function ()
+        {
             storeJsLoaded();
         });
-        
+
         /**
          * Loading Filesaver.js
          */
         console.log('Loading Filesaver.js');
         $.getScript('https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js');
-        
+
         /**
          * Add custom styles as a style tag to page head.
          */
         console.log('Adding custom styles.');
-        $('head').append($('<style/>').html(`
-                #line_separated_urls_leech_textarea, #direct_download_links_list_textarea {
+        $('head').append(
+            $('<style/>').html(`
+.folders-tree .tree-list ul li a{direction: ltr!important;}
+.uploadPage .uploadPage-sidebar .up-s-container .progressLimit{direction: ltr!important;}
+#sh-upload-center {
+    direction: rtl!important;
+}
+.uploadPage{padding: 13px 20px 0!important;}
+.upload-queue {
+    right: auto!important;
+    left: 230px!important;
+}
+.file-manager-container .fm-item .item-iconHolder{float:left!important}
+
+.btn-group-vertical>.btn, .btn-group>.btn {
+    position: relative!important;
+    float: left!important;
+    padding: 10.2px!important;
+}
+.up-s-help {
+    display: none!important;
+}
+
+.leech-box {
+    text-align: right!important;
+    padding: 0 10px 10px 10px!important;
+    direction: rtl!important;
+    min-width: 170px!important;
+    margin: 27px auto 10px auto!important;
+    left: 20px!important;
+    right: auto !important;
+    width: 190px!important;
+    bottom: 5px!important;
+}
+.file-manager-container .fm-item:nth-child(even) {
+    background: #f7f7f7;
+}
+
+.leech-box .percent {
+    display: inline-block!important;
+    margin: 0 5px!important;
+    position: relative!important;
+    top: 6px!important;
+}
+.file-manager-container .file-manager-holder .files-list {
+    max-height: calc(100vh - 189px)!important;
+    overflow: auto!important;
+    padding: 0px!important;
+}
+.file-manager-container .topHeader-fileManager {
+    background-color: #eee!important;
+    border-radius: 3px!important;
+    margin-bottom: 10px!important;
+    height: 48px!important;
+    padding: 5px!important;
+    direction: ltr;
+}
+.file-manager-container .topHeader-fileManager .btn {
+    height: 32px!important;
+    width: 32px!important;
+}
+.uploadPage .uploadPage-sidebar .progress {
+    height: 2px!important;
+    margin-bottom: 5px!important;
+}
+.uploadPage .uploadPage-sidebar .up-s-container {
+    background-color: #eeeeee!important;
+    padding: 15px 15px 10px 15px!important;
+}
+
+.folders-tree .tree-list ul ul li.item:first-child {
+    margin: 0px 0px 5px 0px!important;
+}
+.folders-tree .tree-list ul ul li.item {
+    padding: 5px 0px 0px 0px!important;
+    border-top: 1px solid rgba(197, 197, 197, 0.55)!important;
+    margin: 5px 0px 5px 0px!important;
+}
+
+.folders-tree .tree-list ul ul {
+    padding-top: 5px!important;
+}
+.folders-tree .tree-list ul {
+    margin-left: 0px!important;
+}
+.folders-tree {
+    padding: 12px 11px!important;
+}
+
+.btn-success.active, .btn-success.focus, .btn-success:active, .btn-success:focus, .btn-success:hover, .open>.dropdown-toggle.btn-success {
+    color: #fff!important;
+    background-color: #26d082!important;
+    border-color: #cccccc!important;
+}
+.btn-success {
+    color: #3c3c3c!important;
+    background-color: #f7f7f7!important;
+    border-color: #cccccc!important;
+}
+.folders-tree .tree-list ul li.item.active-folder > a > span.folder-name {
+    color: #4a4a4a!important
+}
+.folders-tree .tree-list ul li.item.active-folder > a {
+    background: #ffffff!important;
+    padding: 5px 5px 5px 11px!important;
+}
+
+.file-name{overflow: hidden;}
+#line_separated_urls_leech_textarea, #direct_download_links_list_textarea {
                     width: 100%;
                     min-height: 200px;
                     resize: none;
@@ -399,14 +511,16 @@
                 
                 #manage_leech_items_list_button {
                     position: fixed;
-                    bottom: 10px;
+                    bottom: 15px;
                     right: 40px;
-                    background: #3F51B5;
+                    background: #337AB7;
                     color: #fff;
                     padding: 10px;
                     font-size: 14px;
+					border: 1px solid #bbbbbb;
+                    border-radius: 4px;
                 }
-                
+
                 .modal-body {
                     max-height: 400px;
                     overflow: auto;
@@ -462,18 +576,20 @@
                 }
                 
                 .folders-tree {
-                    max-height: calc(100vh - 90px - 150px - 61px - 30px - 100px) !important;
+                    max-height: calc(100vh - 150px - 150px - 81px - 30px - 100px) !important;
                 }
                 
                 #extra_leecher_manager_button {
-                    position: fixed;
-                    bottom: 10px;
-                    right: 190px;
-                    background: #1A237E;
-                    color: #fff;
-                    padding: 10px;
-                    font-size: 14px;
-                }
+                   position: fixed;
+                   bottom: 15px;
+                   right: 190px;
+                   background: #8e8e8e;
+                   color: #fff;
+                   padding: 10px;
+                   font-size: 14px;
+                   border: 1px solid #bbbbbb;
+                   border-radius: 4px;
+}
                 
                 .glyphicon-refresh-animate {
                     -animation: spin 1s infinite linear;
@@ -492,47 +608,53 @@
                 
                 #leecher_servers_select_wrapper {
                     position: fixed;
-                    bottom: 55px;
-                    right: 40px;
+                    bottom: 15px;
+                    right: 241px;
                     font-size: 14px;
                 }
-            `));
-        
+            `)
+        );
+
         console.log('Check FileReader support in current browser.');
         /**
          * Check FileReader support in current browser.
          */
-        if (window.FileReader && window.File && window.FileList && window.Blob) {
+        if (window.FileReader && window.File && window.FileList && window.Blob)
+        {
             isFileReaderSupported = true;
         }
-        
+
         /**
          * Check https or http?
          */
         const urlParser = document.createElement('a');
         urlParser.href = window.location.href;
-        if (urlParser.protocol == 'https:') {
+        if (urlParser.protocol == 'https:')
+        {
             window.location.href = 'http:' + window.location.href.substring(window.location.protocol.length);
         }
-        
+
         /**
          * Check url contains www or not?
          */
-        if (urlParser.origin.includes('www.')) {
+        if (urlParser.origin.includes('www.'))
+        {
             requestUrlPrefix = 'www.';
         }
-        
+
         /**
          * Start leech queue submit.
          */
-        setInterval(function () {
+        setInterval(function ()
+        {
             console.log('Try to start leech queue submit.');
-            if (!isSubmittingLeecherQueue) {
+            if (!isSubmittingLeecherQueue)
+            {
                 isSubmittingLeecherQueue = true;
                 startLeechQueueSubmit();
             }
         }, 5000);
-        
+
         console.log('Get common jQuery objects.');
         /**
          * Get common jQuery objects
@@ -542,189 +664,207 @@
         const $actionModals = $('.actions-modal');
         const $BtnNewFolder = $('.btn-newFolder');
         const $shareFolderTheFileHr = $('.the-file hr');
-        
+
         console.log('Inject custom UI elements to page.');
         /**
          * Inject line separated urls leech button.
          */
         $sidebarForm.append(lineSeparatedUrlsLeechButtonHTML);
-        
+
         /**
          * Inject internet download manager (IDM) exported text file to leech button.
          */
-        if (isFileReaderSupported) {
+        if (isFileReaderSupported)
+        {
             $sidebarForm.append(idmExportAsTextToLeechButtonHTML);
         }
-        
+
         /**
          * Inject line separated urls leech modal.
          */
         $actionModals.append(lineSeparatedUrlsLeechModalHTML);
-        
+
         /**
          * Inject internet download manager (IDM) exported text file to leech modal.
          */
-        if (isFileReaderSupported) {
+        if (isFileReaderSupported)
+        {
             $actionModals.append(idmExportAsTextToLeechModalHTML);
         }
-        
+
         /**
          * Inject manage leech items list button.
          */
         $actionModals.append(manageLeechItemsListButtonHTML);
-        
+
         /**
          * Inject manage leech items list modal.
          */
         $actionModals.append(manageLeechItemsListModalHTML);
-        
+
         /**
          * Inject direct download link.
          */
         $actionModals.append(directDownloadLinkOfSelectedItemsModalHtml);
-        
+
         /**
          * Inject direct download selected items.
          */
         $BtnNewFolder.before(directDownloadSelectedItemsButtonHtml);
-        
+
         /**
          * Inject direct download link of selected items.
          */
         $BtnNewFolder.before(directDownloadLinkOfSelectedItemsButtonHtml);
-        
+
         /**
          * Inject refresh file manager button.
          */
         $BtnNewFolder.before(refreshFileManagerButtonHtml);
-        
+
         /**
          * Inject share folder page all files direct download.
          */
         $shareFolderTheFileHr.after(shareFolderDirectDownloadAllFilesAsLinkHTML);
-        
+
         /**
          * Inject share folder page all files direct download.
          */
         $shareFolderTheFileHr.after(shareFolderDirectDownloadAllFilesHTML);
-        
+
         /**
          * Inject share folder page all files direct download links.
          */
         $body.append(directDownloadLinkOfSelectedItemsModalHtml);
-        
+
         /**
          * Inject Extra leecher Manager Button
          */
         $actionModals.append(extraLeecherManagerButtonHTML);
-        
+
         /**
          * Inject Leecher Servers Select and status.
          */
         $actionModals.append(leecherServersSelectAndStatusHTML);
-        
+
         /**
          * Inject Extra leecher manager modal
          */
         $actionModals.append(extraLeecherManagerModalHtml);
-        
+
         /**
          * Inject direct download link of sharefolder each items
          */
-        $('.the-file ul li').each(function () {
-            const directDownloadLinkURL = $(this).find('a').attr('href'), directDownloadLink = $(shareFolderDirectDownloadLinkOfItemLinkHTML).attr('href', directDownloadLinkURL), downloadItemIndex = $(this).find('.btn-info');
+        $('.the-file ul li').each(function ()
+        {
+            const directDownloadLinkURL = $(this).find('a').attr('href'),
+                directDownloadLink = $(shareFolderDirectDownloadLinkOfItemLinkHTML).attr('href', directDownloadLinkURL),
+                downloadItemIndex = $(this).find('.btn-info');
             $(this).find('.btn-group').prepend(directDownloadLink);
             $(this).find('.btn-group').prepend(downloadItemIndex);
         });
-        
+
         console.log('Register UI elements events.');
         /**
          * Click on line separated urls leech button event.
          */
-        $body.on('click', '#line_separated_urls_leech_button', function () {
+        $body.on('click', '#line_separated_urls_leech_button', function ()
+        {
             console.log('Open line separated urls leech modal.');
             var $lineSeparatedUrlsLeechModal = $('#line_separated_urls_leech_modal');
-            $lineSeparatedUrlsLeechModal.on('shown.bs.modal', function () {
+            $lineSeparatedUrlsLeechModal.on('shown.bs.modal', function ()
+            {
                 $('#line_separated_urls_leech_textarea').focus();
             });
             $lineSeparatedUrlsLeechModal.modal('show');
         });
-        
+
         /**
          * Focus on single leech input text
          */
-        $('.leech-modal').on('shown.bs.modal', function () {
+        $('.leech-modal').on('shown.bs.modal', function ()
+        {
             $('#fileAddress').select();
         });
-        
+
         /**
          * Focus on new folder input text
          */
-        $('.new-folder-modal').on('shown.bs.modal', function () {
+        $('.new-folder-modal').on('shown.bs.modal', function ()
+        {
             $('#folderName').select();
         });
-        
+
         /**
          * Focus on rename input text
          */
-        $('.rename-modal').on('shown.bs.modal', function () {
+        $('.rename-modal').on('shown.bs.modal', function ()
+        {
             $('#fileName').select();
         });
-        
+
         /**
          * Click on internet download manager (IDM) exported text file to leech button event.
          */
-        $body.on('click', '#idm_export_as_text_to_leech_button', function () {
+        $body.on('click', '#idm_export_as_text_to_leech_button', function ()
+        {
             console.log('Open internet download manager (IDM) exported text file to leech modal.');
             $('#idm_export_as_text_to_leech_modal').modal('show');
         });
-        
+
         /**
          * Submit line separated urls leech event.
          */
-        $body.on('click', '#do_line_separated_urls_leech', function () {
+        $body.on('click', '#do_line_separated_urls_leech', function ()
+        {
             console.log('Submit line separated urls leech.');
             submitLineSeparatedUrlsLeechTextarea();
         });
-        
+
         /**
          * Submit internet download manager (IDM) exported text file to leech event.
          */
-        $body.on('click', '#do_idm_export_as_text_to_leech', function () {
+        $body.on('click', '#do_idm_export_as_text_to_leech', function ()
+        {
             console.log('Submit internet download manager (IDM) exported text file to leech.');
             submitIdmExportAsTextToLeechInput();
         });
-        
+
         /**
          * Choose internet download manager (IDM) exported text file change input event.
          */
-        $body.on('change', '#idm_export_as_text_to_leech_input', function () {
+        $body.on('change', '#idm_export_as_text_to_leech_input', function ()
+        {
             const file = $('#idm_export_as_text_to_leech_input').get(0).files[0];
-            if (file) {
+            if (file)
+            {
                 $('#chosen_idm_export_as_text_to_leech_file_name').html('فایل انتخاب شده: ' + file.name);
             }
         });
-        
+
         /**
          * Click on manage leech items list button event.
          */
-        $body.on('click', '#manage_leech_items_list_button', function () {
+        $body.on('click', '#manage_leech_items_list_button', function ()
+        {
             console.log('Open manage leech items list modal.');
             $('#manage_leech_items_list_modal').modal('show');
         });
-        
+
         /**
          * Click on clear leech items list event.
          */
-        $body.on('click', '#clear_leech_items_list', function () {
+        $body.on('click', '#clear_leech_items_list', function ()
+        {
             console.log('Clear leech items list.');
             doClearLeechItemsList();
         });
-        
+
         /**
          * Click on remove item form leech items list event.
          */
-        $body.on('click', '.remove-item-from-leech-items-list', function (event) {
+        $body.on('click', '.remove-item-from-leech-items-list', function (event)
+        {
             const itemGUID = $(event.currentTarget).attr('data-guid');
             console.log('Remove leech item form items list: ' + itemGUID);
             store.remove(itemGUID);
@@ -732,228 +872,266 @@
             removeItemFromLeechItemsQueueList(itemGUID);
             renderManageLeechItemsListTable();
         });
-        
+
         /**
          * Click on add item to leech items queue event.
          */
-        $body.on('click', '.add-item-to-leech-items-queue-again', function (event) {
+        $body.on('click', '.add-item-to-leech-items-queue-again', function (event)
+        {
             const itemGUID = $(event.currentTarget).attr('data-guid');
             console.log('Add item to leech items queue list again: ' + itemGUID);
             const item = store.get(itemGUID);
-            if (item) {
+            if (item)
+            {
                 item.status = 1;
                 store.set(itemGUID, item);
                 leecherItemsQueueList.unshift(itemGUID);
             }
             renderManageLeechItemsListTable();
         });
-        
+
         /**
          * Click on direct download selected items button event.
          */
-        $body.on('click', '#direct_download_selected_items', function () {
+        $body.on('click', '#direct_download_selected_items', function ()
+        {
             console.log('Handle direct download selected items');
             handleDirectDownloadSelectedItems();
         });
-        
+
         /**
          * Click on get direct download list export to txt.
          */
-        $body.on('click', '#do_get_direct_download_list_export_to_txt', function () {
+        $body.on('click', '#do_get_direct_download_list_export_to_txt', function ()
+        {
             console.log('Export to text file direct download list.');
-            const blob = new Blob([directDownloadLinksList.join('\n')], { type: 'text/plain;charset=utf-8' });
+            const blob = new Blob([directDownloadLinksList.join('\n')], {type: 'text/plain;charset=utf-8'});
             saveAs(blob, generateGUID() + '.txt');
         });
-        
+
         /**
          * Click on direct download link of selected items button event.
          */
-        $body.on('click', '#direct_download_link_of_selected_items', function () {
+        $body.on('click', '#direct_download_link_of_selected_items', function ()
+        {
             console.log('Handle direct download link of selected items');
             $('#direct_download_link_of_selected_items_modal').modal('show');
             directDownloadLinksList = [];
             handleDirectDownloadLinkOfSelectedItems();
         });
-        
+
+
         /**
          * Click on direct download selected items button event.
          */
-        $body.on('click', '#refresh_file_manager', function () {
+        $body.on('click', '#refresh_file_manager', function ()
+        {
             console.log('Refresh file manager.');
             handleRefreshUsedSpace();
             handleRefreshFileManager();
         });
-        
+
         /**
          * Click on share folder direct download of all files button event.
          */
-        $body.on('click', '#sharefolder_direct_download_of_all_files_button', function () {
+        $body.on('click', '#sharefolder_direct_download_of_all_files_button', function ()
+        {
             console.log('Handle share folder direct download of all files.');
             handleShareFolderDirectDownloadOfAllFiles();
         });
-        
+
         /**
          * Click on direct download link of sharefolder all files.
          */
-        $body.on('click', '#sharefolder_direct_download_of_all_files_as_link_button', function () {
+        $body.on('click', '#sharefolder_direct_download_of_all_files_as_link_button', function ()
+        {
             console.log('Handle share folder direct download link of all items.');
             $('#direct_download_link_of_selected_items_modal').modal('show');
             directDownloadLinksList = [];
             handleShareFolderDirectDownloadLinkOfAllFiles();
         });
-        
+
         /**
          * Click on direct download link of one item in share folder.
          */
-        $body.on('click', '.direct-download-item', function (event) {
+        $body.on('click', '.direct-download-item', function (event)
+        {
             event.preventDefault();
             console.log('Handle direct download of one item in sharefolder.');
             handleShareFolderDirectDownloadOfItem($(event.currentTarget).attr('href'));
         });
-        
+
         /**
          * Click on extra leecher manager button.
          */
-        $body.on('click', '#extra_leecher_manager_button', function (event) {
+        $body.on('click', '#extra_leecher_manager_button', function (event)
+        {
             event.preventDefault();
             console.log('Extra leecher manager opening.');
             $('#extra_leecher_manager_modal').modal('show');
         });
-        
+
         /**
          * Handle instagram leech button click
          */
-        $body.on('click', '#do_instagram_leech', function (event) {
+        $body.on('click', '#do_instagram_leech', function (event)
+        {
             event.preventDefault();
             $(this).attr('disabled', 'disabled');
             handleInstagramLeech();
         });
-        
+
         /**
          * Handle leecher server click on button
          */
-        $body.on('click', '.leecher-server-button', function (event) {
+        $body.on('click', '.leecher-server-button', function (event)
+        {
             event.preventDefault();
             console.log('Handle Leecher Server Button Click');
             handleLeecherServerSelect($(event.target).attr('data-id'));
         });
-        
+
         /**
          * Handle leecher server status refresh click
          */
-        $body.on('click', '.refresh-server-statuses', function (event) {
+        $body.on('click', '.refresh-server-statuses', function (event)
+        {
             event.preventDefault();
             console.log('Refresh leecher server statuses');
             const $this = $(this);
-            
+
             $this.find('i').addClass('glyphicon-refresh-animate ');
-            setTimeout(function () {
-                checkServerStatuses(function () {
+            setTimeout(function ()
+            {
+                checkServerStatuses(function ()
+                {
                     $this.find('i').removeClass('glyphicon-refresh-animate ');
                 });
             }, 500);
         });
-        
+
+
         /**
          * All the functionality that we needed.
          */
-        
+
         /**
          * When StoreJS loaded, Retrieve saved data form LocalStorage
          */
-        function storeJsLoaded() {
+        function storeJsLoaded()
+        {
             console.log('Store.js loaded.');
-            
+
             console.log('Retrieve leecher items list.');
-            if (store.get(LEECHER_ITEMS_LIST_KEY)) {
+            if (store.get(LEECHER_ITEMS_LIST_KEY))
+            {
                 leecherItemsList = store.get(LEECHER_ITEMS_LIST_KEY);
-            } else {
+            } else
+            {
                 store.set(LEECHER_ITEMS_LIST_KEY, leecherItemsList);
             }
-            
+
             console.log('Retrieve leecher items queue list.');
-            if (store.get(LEECHER_ITEMS_QUEUE_LIST_KEY)) {
+            if (store.get(LEECHER_ITEMS_QUEUE_LIST_KEY))
+            {
                 leecherItemsQueueList = store.get(LEECHER_ITEMS_QUEUE_LIST_KEY);
-            } else {
+            } else
+            {
                 store.set(LEECHER_ITEMS_QUEUE_LIST_KEY, leecherItemsQueueList);
             }
-            
+
             console.log('Retrieve leecher server id.');
-            if (store.get(LEECHER_SERVER_ID_KEY)) {
+            if (store.get(LEECHER_SERVER_ID_KEY))
+            {
                 leecherServerId = store.get(LEECHER_SERVER_ID_KEY);
-            } else {
+            } else
+            {
                 store.set(LEECHER_SERVER_ID_KEY, 'dl1');
             }
             checkServerStatuses();
-            
+
             renderManageLeechItemsListTable();
         }
-        
+
         /**
          * Generate GUID
          * @returns {string}
          */
-        function generateGUID() {
-            function s4() {
+        function generateGUID()
+        {
+            function s4()
+            {
                 return Math.floor((1 + Math.random()) * 0x10000)
-                           .toString(16)
-                           .substring(1);
+                    .toString(16)
+                    .substring(1);
             }
-            
-            return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+
+            return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+                s4() + '-' + s4() + s4() + s4();
         }
-        
+
         /**
          * Convert line separated urls string to array.
          * @param lineSeparatedUrls
          * @returns {Array}
          */
-        function convertLineSeparatedUrlsToArray(lineSeparatedUrls) {
-            if (typeof lineSeparatedUrls == 'string') {
+        function convertLineSeparatedUrlsToArray(lineSeparatedUrls)
+        {
+            if (typeof lineSeparatedUrls == 'string')
+            {
                 return lineSeparatedUrls.split('\n');
             }
-            
+
             return [];
         }
-        
+
         /**
          * Get current folder id using the window location
          * @returns {number}
          */
-        function getCurrentFolderId() {
-            let urlParser = document.createElement('a'), folderId = 0;
+        function getCurrentFolderId()
+        {
+            let urlParser = document.createElement('a'),
+                folderId = 0;
             urlParser.href = window.location.href;
-            if (urlParser.hash !== '#/home') {
+            if (urlParser.hash !== '#/home')
+            {
                 const urlPaths = urlParser.hash.split('/');
                 folderId = urlPaths[urlPaths.length - 1];
             }
-            
+
             return folderId;
         }
-        
+
         /**
          * Add array of urls to leech list
          * @param urlsArray {Array}
          * @param callback {function}
          */
-        function addUrlsArrayToLeechList(urlsArray, callback) {
+        function addUrlsArrayToLeechList(urlsArray, callback)
+        {
             const currentFolderId = getCurrentFolderId();
-            
-            for (let urlIndex in urlsArray) {
-                if (urlsArray.hasOwnProperty(urlIndex)) {
-                    if (typeof urlsArray[urlIndex] == 'string' && urlsArray[urlIndex] !== '') {
+
+            for (let urlIndex in urlsArray)
+            {
+                if (urlsArray.hasOwnProperty(urlIndex))
+                {
+                    if (typeof urlsArray[urlIndex] == 'string' && urlsArray[urlIndex] !== '')
+                    {
                         console.log('Add url to leech list: ' + urlsArray[urlIndex]);
                         const file = {
                             url: urlsArray[urlIndex],
                             folderId: currentFolderId,
                             status: LEECH_FILE_STATUS.NOT_SUBMITTED
                         };
-                        
+
                         let fileNotAdded = true;
                         let fileGUID = '';
-                        while (fileNotAdded) {
+                        while (fileNotAdded)
+                        {
                             fileGUID = generateGUID();
-                            if (!store.get(fileGUID)) {
+                            if (!store.get(fileGUID))
+                            {
                                 store.set(fileGUID, file);
                                 leecherItemsList.push(fileGUID);
                                 leecherItemsQueueList.unshift(fileGUID);
@@ -969,17 +1147,20 @@
             renderManageLeechItemsListTable();
             callback();
         }
-        
+
         /**
          * Submit line separated urls to leech textarea
          */
-        function submitLineSeparatedUrlsLeechTextarea() {
+        function submitLineSeparatedUrlsLeechTextarea()
+        {
             const $lineSeparatedUrlsLeechTextarea = $('#line_separated_urls_leech_textarea');
             const lineSeparatedUrlsLeechTextareaValue = $lineSeparatedUrlsLeechTextarea.val();
-            if (lineSeparatedUrlsLeechTextareaValue) {
+            if (lineSeparatedUrlsLeechTextareaValue)
+            {
                 const lineSeparatedUrlsLeechArray = convertLineSeparatedUrlsToArray(lineSeparatedUrlsLeechTextareaValue);
                 console.log('Add urls array from line separated urls leech textarea.');
-                addUrlsArrayToLeechList(lineSeparatedUrlsLeechArray, function () {
+                addUrlsArrayToLeechList(lineSeparatedUrlsLeechArray, function ()
+                {
                     $lineSeparatedUrlsLeechTextarea.val('');
                     $('#line_separated_urls_leech_modal').modal('hide');
                     noty({
@@ -988,64 +1169,79 @@
                 });
             }
         }
-        
+
         /**
          * Submit internet download manager (IDM) exported text file to leech input
          */
-        function submitIdmExportAsTextToLeechInput() {
-            const $idmExportAsTextToLeechInput = $('#idm_export_as_text_to_leech_input'), idmExportAsTextToLeechFile = $idmExportAsTextToLeechInput.get(0).files[0], fileReader = new FileReader(), fileExtensionRegex = /(?:\.([^.]+))?$/;
-            
-            fileReader.onload = function (event) {
+        function submitIdmExportAsTextToLeechInput()
+        {
+            const $idmExportAsTextToLeechInput = $('#idm_export_as_text_to_leech_input'),
+                idmExportAsTextToLeechFile = $idmExportAsTextToLeechInput.get(0).files[0],
+                fileReader = new FileReader(),
+                fileExtensionRegex = /(?:\.([^.]+))?$/;
+
+            fileReader.onload = function (event)
+            {
                 const lineSeparatedUrlsLeechArray = convertLineSeparatedUrlsToArray(event.target.result);
                 console.log('Add urls array from internet download manager (IDM) exported text file to leech input.');
-                addUrlsArrayToLeechList(lineSeparatedUrlsLeechArray, function () {
+                addUrlsArrayToLeechList(lineSeparatedUrlsLeechArray, function ()
+                {
                     $idmExportAsTextToLeechInput.val('');
                     $('#idm_export_as_text_to_leech_modal').modal('hide');
                     noty({
                         text: 'فایل ها برای انتقال ارسال شد.'
                     });
                 });
-                
+
             };
-            
-            if (idmExportAsTextToLeechFile) {
+
+            if (idmExportAsTextToLeechFile)
+            {
                 console.log('Check internet download manager (IDM) exported text file to leech input file is txt.');
-                if (fileExtensionRegex.exec(idmExportAsTextToLeechFile.name)[1] == 'txt') {
+                if (fileExtensionRegex.exec(idmExportAsTextToLeechFile.name)[1] == 'txt')
+                {
                     console.log('Internet download manager (IDM) exported text file to leech input file is txt.');
                     fileReader.readAsText(idmExportAsTextToLeechFile);
-                } else {
+                } else
+                {
                     noty({
                         text: 'فرمت فایل انتخاب شده نادرست است.',
                         type: 'error'
                     });
                 }
-            } else {
+            } else
+            {
                 noty({
                     text: 'فایل خروجی IDM انتخاب نشده است.',
                     type: 'error'
                 });
             }
         }
-        
+
         /**
          * Render manage leech items list table.
          */
-        function renderManageLeechItemsListTable() {
+        function renderManageLeechItemsListTable()
+        {
             const $leechItemsListTableTbody = $('#leech_items_list_table_tbody');
             $leechItemsListTableTbody.html('');
-            for (let leechItemIndex in leecherItemsList) {
+            for (let leechItemIndex in leecherItemsList)
+            {
                 const uploadGUID = leecherItemsList[leechItemIndex];
                 const upload = store.get(uploadGUID);
                 let uploadHTML = '<tr><td></td><td style="max-width:650px; overflow:auto;">' + upload.url + '</td>';
-                if (upload.status == LEECH_FILE_STATUS.NOT_SUBMITTED) {
+                if (upload.status == LEECH_FILE_STATUS.NOT_SUBMITTED)
+                {
                     uploadHTML += '<td>در صف ارسال</td>';
                     uploadHTML += '<td><span data-guid="' + uploadGUID + '" class="btn btn-primary remove-item-from-leech-items-list">حذف</span></td>';
-                } else if (upload.status == 2) {
+                } else if (upload.status == 2)
+                {
                     //uploadHTML += '<td>خطا در ارسال</td>';
                     //uploadHTML += '<td><span data-guid="' + uploadGUID + '" class="btn btn-primary add-item-to-leech-items-queue-again">دوباره</span></td>';
-                    
+
                 }
-                if (upload.status == LEECH_FILE_STATUS.SUBMIT_SUCCESS) {
+                if (upload.status == LEECH_FILE_STATUS.SUBMIT_SUCCESS)
+                {
                     uploadHTML += '<td>ارسال شده</td>';
                     uploadHTML += '<td><span data-guid="' + uploadGUID + '" class="btn btn-primary remove-item-from-leech-items-list">حذف</span> <span data-guid="' + uploadGUID + '" class="btn btn-primary add-item-to-leech-items-queue-again">دوباره</span></td>';
                 }
@@ -1053,11 +1249,12 @@
                 $leechItemsListTableTbody.prepend(uploadHTML);
             }
         }
-        
+
         /**
          * Clear leech items list.
          */
-        function doClearLeechItemsList() {
+        function doClearLeechItemsList()
+        {
             console.log('Leech items list cleared.');
             store.clear();
             leecherItemsList = [];
@@ -1066,69 +1263,82 @@
             store.set(LEECHER_ITEMS_QUEUE_LIST_KEY, []);
             renderManageLeechItemsListTable();
         }
-        
+
         /**
          * Remove an item from leech items list
          */
-        function removeItemFromLeechItemsList(itemGUID) {
+        function removeItemFromLeechItemsList(itemGUID)
+        {
             const index = leecherItemsList.indexOf(itemGUID);
-            if (index > -1) {
+            if (index > -1)
+            {
                 leecherItemsList.splice(index, 1);
                 store.set(LEECHER_ITEMS_LIST_KEY, leecherItemsList);
             }
         }
-        
+
         /**
          * Remove an item from leech items queue list
          */
-        function removeItemFromLeechItemsQueueList(itemGUID) {
+        function removeItemFromLeechItemsQueueList(itemGUID)
+        {
             const index = leecherItemsQueueList.indexOf(itemGUID);
-            if (index > -1) {
+            if (index > -1)
+            {
                 leecherItemsQueueList.splice(index, 1);
                 store.set(LEECHER_ITEMS_QUEUE_LIST_KEY, leecherItemsQueueList);
             }
         }
-        
+
         /**
          * Start leech queue submit.
          */
-        function startLeechQueueSubmit() {
+        function startLeechQueueSubmit()
+        {
             console.log('Starting leech queue submit.');
-            if (leecherItemsQueueList.length > 0) {
+            if (leecherItemsQueueList.length > 0)
+            {
                 const itemGUID = leecherItemsQueueList[0];
                 const item = store.get(itemGUID);
-                if (item) {
-                    submitItemToLeecher(item.url, item.folderId, function (error) {
-                        if (error) {
+                if (item)
+                {
+                    submitItemToLeecher(item.url, item.folderId, function (error)
+                    {
+                        if (error)
+                        {
                             console.log('Leech Item Error. Add item to leech items queue list again: ' + itemGUID);
                             item.status = LEECH_FILE_STATUS.NOT_SUBMITTED;
                             store.set(itemGUID, item);
                             leecherItemsQueueList.unshift(itemGUID);
-                        } else {
+                        } else
+                        {
                             item.status = LEECH_FILE_STATUS.SUBMIT_SUCCESS;
                         }
                         store.set(itemGUID, item);
                         removeItemFromLeechItemsQueueList(itemGUID);
                         const time = Math.floor(Math.random() * 10000 / 4) + 3000;
-                        setTimeout(function () {
+                        setTimeout(function ()
+                        {
                             startLeechQueueSubmit();
                         }, time);
                         renderManageLeechItemsListTable();
                     });
                 }
-            } else {
+            } else
+            {
                 isSubmittingLeecherQueue = false;
             }
         }
-        
+
         /**
          * Submit item to Leech.
          */
-        function submitItemToLeecher(itemUrl, itemFolderId, callback) {
+        function submitItemToLeecher(itemUrl, itemFolderId, callback)
+        {
             console.log('Submitting item to leecher: ' + itemUrl + ' ' + itemFolderId);
             const leechHub = new SocketEngine("ws://namava.ir:8090", true);
             const myClientId = leechHub.connectionId;
-            
+
             $.ajax({
                 type: "POST",
                 contentType: "application/json",
@@ -1141,113 +1351,140 @@
                     ConnectionId: myClientId,
                     FolderId: itemFolderId
                 })
-            }).success(function (data) {
+            }).success(function (data)
+            {
                 console.log('Success', data);
                 callback();
-            }).fail(function (ex, message, mmmm, koft) {
+            }).fail(function (ex, message, mmmm, koft)
+            {
                 callback('error');
             });
         }
-        
+
         /**
          * Handle direct download selected items.
          */
-        function handleDirectDownloadSelectedItems() {
+        function handleDirectDownloadSelectedItems()
+        {
             const currentFolderId = getCurrentFolderId();
-            
+
             const selectedFilesAndFolders = getSelectedFilesAndFolders();
-            
+
             console.log('Selected Files: ' + selectedFilesAndFolders.files);
             console.log('Selected Folders: ' + selectedFilesAndFolders.folders);
-            
-            if (selectedFilesAndFolders.files.length > 0) {
-                getFolderArchiveContext(currentFolderId, function (folderArchiveContext) {
+
+            if (selectedFilesAndFolders.files.length > 0)
+            {
+                getFolderArchiveContext(currentFolderId, function (folderArchiveContext)
+                {
                     console.log('Direct downloading of selected files in folder: ' + folderArchiveContext);
-                    for (let fileIndex in selectedFilesAndFolders.files) {
+                    for (let fileIndex in selectedFilesAndFolders.files)
+                    {
                         const fileDownloadPageUrl = getFileDownloadPageUrl(selectedFilesAndFolders.files[fileIndex], folderArchiveContext);
                         startDirectDownloadOfFileByPageUrl(fileDownloadPageUrl);
                     }
                 });
             }
-            
-            if (selectedFilesAndFolders.folders.length > 0) {
-                for (let selectedFolderIndex in selectedFilesAndFolders.folders) {
+
+            if (selectedFilesAndFolders.folders.length > 0)
+            {
+                for (let selectedFolderIndex in selectedFilesAndFolders.folders)
+                {
                     const folderId = selectedFilesAndFolders.folders[selectedFolderIndex];
                     console.log('Direct downloading of selected folder: ' + folderId);
-                    getFolderArchiveContext(folderId, function (folderArchiveContext) {
+                    getFolderArchiveContext(folderId, function (folderArchiveContext)
+                    {
                         directDownloadFolderFiles(folderArchiveContext);
                     });
-                    
+
                 }
             }
         }
-        
+
         /**
          * Handle direct download link of selected items
          */
-        function handleDirectDownloadLinkOfSelectedItems() {
+        function handleDirectDownloadLinkOfSelectedItems()
+        {
             const currentFolderId = getCurrentFolderId();
-            
+
             const selectedFilesAndFolders = getSelectedFilesAndFolders();
-            
+
             console.log('Selected Files: ' + selectedFilesAndFolders.files);
             console.log('Selected Folders: ' + selectedFilesAndFolders.folders);
-            
-            if (selectedFilesAndFolders.files.length > 0) {
-                getFolderArchiveContext(currentFolderId, function (folderArchiveContext) {
+
+            if (selectedFilesAndFolders.files.length > 0)
+            {
+                getFolderArchiveContext(currentFolderId, function (folderArchiveContext)
+                {
                     console.log('Direct downloading of selected files in folder: ' + folderArchiveContext);
-                    for (let fileIndex in selectedFilesAndFolders.files) {
+                    for (let fileIndex in selectedFilesAndFolders.files)
+                    {
                         const fileDownloadPageUrl = getFileDownloadPageUrl(selectedFilesAndFolders.files[fileIndex], folderArchiveContext);
-                        getFileDirectDownloadUrlByDownloadPageUrl(fileDownloadPageUrl, function (directUrl) {
+                        getFileDirectDownloadUrlByDownloadPageUrl(fileDownloadPageUrl, function (directUrl)
+                        {
                             directDownloadLinksList.push(directUrl);
                             renderDirectDownloadListModal();
                         });
                     }
                 });
             }
-            
-            if (selectedFilesAndFolders.folders.length > 0) {
-                for (let selectedFolderIndex in selectedFilesAndFolders.folders) {
+
+            if (selectedFilesAndFolders.folders.length > 0)
+            {
+                for (let selectedFolderIndex in selectedFilesAndFolders.folders)
+                {
                     const folderId = selectedFilesAndFolders.folders[selectedFolderIndex];
                     console.log('Direct downloading of selected folder: ' + folderId);
-                    getFolderArchiveContext(folderId, function (folderArchiveContext) {
+                    getFolderArchiveContext(folderId, function (folderArchiveContext)
+                    {
                         const folderFiles = getFolderFilesPageUrl(folderArchiveContext);
-                        for (let fileIndex in folderFiles) {
-                            getFileDirectDownloadUrlByDownloadPageUrl(folderFiles[fileIndex].pageUrl, function (directUrl) {
+                        for (let fileIndex in folderFiles)
+                        {
+                            getFileDirectDownloadUrlByDownloadPageUrl(folderFiles[fileIndex].pageUrl, function (directUrl)
+                            {
                                 directDownloadLinksList.push(directUrl);
                                 renderDirectDownloadListModal();
                             });
                         }
-                        
+
                     });
-                    
+
                 }
             }
         }
-        
-        function renderDirectDownloadListModal() {
-            const $directDownloadListListularTBody = $('#direct_download_links_list_tbody'), $directDownloadListTextularText = $('#direct_download_links_list_textarea');
+
+        function renderDirectDownloadListModal()
+        {
+            const $directDownloadListListularTBody = $('#direct_download_links_list_tbody'),
+                $directDownloadListTextularText = $('#direct_download_links_list_textarea');
             $directDownloadListListularTBody.html('');
             $directDownloadListTextularText.val(directDownloadLinksList.join('\n'));
             console.log(directDownloadLinksList.join('\n'));
-            
-            for (var directDownloadLinkIndex in directDownloadLinksList) {
+
+            for (var directDownloadLinkIndex in directDownloadLinksList)
+            {
                 $directDownloadListListularTBody.append('<tr><td style="direction: ltr;text-align: left;"><a href="' + directDownloadLinksList[directDownloadLinkIndex] + '">' + directDownloadLinksList[directDownloadLinkIndex] + '</a></td></tr>');
             }
-            
+
         }
-        
+
         /**
          * Get selected files and folders
          */
-        function getSelectedFilesAndFolders() {
+        function getSelectedFilesAndFolders()
+        {
             const selectedItems = $('.fm-item.ui-selected');
-            
-            let selectedFolders = [], selectedFiles = [];
-            $.each(selectedItems, function () {
-                if ($(this).hasClass('file')) {
+
+            let selectedFolders = [],
+                selectedFiles = [];
+            $.each(selectedItems, function ()
+            {
+                if ($(this).hasClass('file'))
+                {
                     selectedFiles.push($(this).attr('data-id'));
-                } else if ($(this).hasClass('archive-folder')) {
+                } else if ($(this).hasClass('archive-folder'))
+                {
                     selectedFolders.push($(this).attr('data-id'));
                 }
             });
@@ -1256,29 +1493,36 @@
                 folders: selectedFolders
             };
         }
-        
+
         /**
          * Get folder archive context
          */
-        function getFolderArchiveContext(folderId, callback) {
+        function getFolderArchiveContext(folderId, callback)
+        {
             console.log('Getting folder archive context: ' + folderId);
-            $.get('http://' + requestUrlPrefix + 'shatelland.com/api/Archive/GetUserArchiveContext/' + folderId + '/0', function (data) {
+            $.get('http://' + requestUrlPrefix + 'shatelland.com/api/Archive/GetUserArchiveContext/' + folderId + '/0', function (data)
+            {
                 callback(data);
             });
         }
-        
+
         /**
          * Get download page url of file.
          */
-        function getFileDownloadPageUrl(fileId, folderArchiveContext) {
+        function getFileDownloadPageUrl(fileId, folderArchiveContext)
+        {
             console.log('Get file download page url: ' + fileId);
             let pageUrl = '';
-            for (let nonAttrArchive in folderArchiveContext.NonAttrArchives) {
-                if (folderArchiveContext.NonAttrArchives[nonAttrArchive].ArchiveId == fileId) {
+            for (let nonAttrArchive in folderArchiveContext.NonAttrArchives)
+            {
+                if (folderArchiveContext.NonAttrArchives[nonAttrArchive].ArchiveId == fileId)
+                {
                     const fileArchiveAttrs = folderArchiveContext.NonAttrArchives[nonAttrArchive].NonAttrArchiveFiles[0].FileArchiveAttributes;
                     let fileLink = '';
-                    for (let attr_index in fileArchiveAttrs) {
-                        if (fileArchiveAttrs[attr_index].Key == 'link') {
+                    for (let attr_index in fileArchiveAttrs)
+                    {
+                        if (fileArchiveAttrs[attr_index].Key == 'link')
+                        {
                             fileLink = fileArchiveAttrs[attr_index].Value;
                             break;
                         }
@@ -1286,169 +1530,207 @@
                     pageUrl = 'http://' + requestUrlPrefix + 'shatelland.com/upload' + fileLink;
                 }
             }
-            
+
             return pageUrl;
         }
-        
+
         /**
          * Start direct download of file by its download page url.
          * @param fileDownloadPageUrl
          */
-        function startDirectDownloadOfFileByPageUrl(fileDownloadPageUrl) {
-            getFileDirectDownloadUrlByDownloadPageUrl(fileDownloadPageUrl, function (downloadDirectUrl) {
+        function startDirectDownloadOfFileByPageUrl(fileDownloadPageUrl)
+        {
+            getFileDirectDownloadUrlByDownloadPageUrl(fileDownloadPageUrl, function (downloadDirectUrl)
+            {
                 console.log('Direct downloading of file: ' + downloadDirectUrl);
-                
-                if (downloadDirectUrl) {
+
+                if (downloadDirectUrl)
+                {
                     $('body').append('<iframe class="file-direct-download-iframe" src="' + downloadDirectUrl + '"></iframe>');
                 }
             });
         }
-        
+
         /**
          * Get file direct download url by download page url
          */
-        function getFileDirectDownloadUrlByDownloadPageUrl(fileDownloadPageUrl, callback) {
-            $.get(fileDownloadPageUrl, function (data) {
+        function getFileDirectDownloadUrlByDownloadPageUrl(fileDownloadPageUrl, callback)
+        {
+            $.get(fileDownloadPageUrl, function (data)
+            {
                 const downloadDirectUrlRegex = /id="downloadFile" href="(.*)" /i;
                 const downloadDirectUrl = downloadDirectUrlRegex.exec(data)[1];
-                
+
                 callback(downloadDirectUrl);
             });
         }
-        
+
         /**
          * Direct download of whole folder
          */
-        function directDownloadFolderFiles(folderArchiveContext) {
+        function directDownloadFolderFiles(folderArchiveContext)
+        {
             const files = getFolderFilesPageUrl(folderArchiveContext);
-            for (var fileIndex in files) {
+            for (var fileIndex in files)
+            {
                 startDirectDownloadOfFileByPageUrl(files[fileIndex].pageUrl);
             }
         }
-        
+
         /**
          * Get folder files page url
          * @param folderArchiveContext
          * @returns {Array}
          */
-        function getFolderFilesPageUrl(folderArchiveContext) {
+        function getFolderFilesPageUrl(folderArchiveContext)
+        {
             let files = [];
-            if (folderArchiveContext.NonAttrArchives.length > 0) {
+            if (folderArchiveContext.NonAttrArchives.length > 0)
+            {
                 const filesJson = folderArchiveContext.NonAttrArchives;
-                for (let fileIndex in filesJson) {
+                for (let fileIndex in filesJson)
+                {
                     const file = filesJson[fileIndex];
                     const fileArchiveAttrs = file.NonAttrArchiveFiles[0].FileArchiveAttributes;
                     let fileLink = '';
-                    for (let attr_index in fileArchiveAttrs) {
-                        if (fileArchiveAttrs[attr_index].Key == 'link') {
+                    for (let attr_index in fileArchiveAttrs)
+                    {
+                        if (fileArchiveAttrs[attr_index].Key == 'link')
+                        {
                             fileLink = fileArchiveAttrs[attr_index].Value;
                             break;
                         }
                     }
-                    files.push({ pageUrl: 'http://' + requestUrlPrefix + 'shatelland.com/upload' + fileLink });
+                    files.push({pageUrl: 'http://' + requestUrlPrefix + 'shatelland.com/upload' + fileLink});
                 }
             }
             return files;
         }
-        
+
         /**
          * Handle Refresh Used Space
          */
-        function handleRefreshUsedSpace() {
+        function handleRefreshUsedSpace()
+        {
             console.log('Refresh Used Space');
-            const injector = $('body').injector(), $timeout = injector.get('$timeout');
-            
+            const injector = $('body').injector(),
+                $timeout = injector.get('$timeout');
+
             var scope = $('.progressLimit').scope();
             scope.reloadUserAccountInfo();
-            
-            $timeout(function () {
-                scope.$apply(function () {
+
+            $timeout(function ()
+            {
+                scope.$apply(function ()
+                {
                 });
             }, 0);
         }
-        
+
         /**
          * Handle refresh file manager
          */
-        function handleRefreshFileManager() {
-            const currentFolderId = getCurrentFolderId(), injector = $('body').injector(), FileSystemRegistry = injector.get('UploadCenter.Service.FileSystemRegistry'), $timeout = injector.get('$timeout');
-            
+        function handleRefreshFileManager()
+        {
+            const currentFolderId = getCurrentFolderId(),
+                injector = $('body').injector(),
+                FileSystemRegistry = injector.get('UploadCenter.Service.FileSystemRegistry'),
+                $timeout = injector.get('$timeout');
+
             let index = FileSystemRegistry.fetchedFolders.indexOf(currentFolderId);
-            if (index > -1) {
+            if (index > -1)
+            {
                 FileSystemRegistry.fetchedFolders.splice(index, 1);
             }
-            
-            if (FileSystemRegistry._reg_data.hasOwnProperty(currentFolderId)) {
+
+            if (FileSystemRegistry._reg_data.hasOwnProperty(currentFolderId))
+            {
                 delete FileSystemRegistry._reg_data[currentFolderId];
             }
-            
-            FileSystemRegistry.setData(currentFolderId, function () {
+
+            FileSystemRegistry.setData(currentFolderId, function ()
+            {
                 var scope = $('.file-manager-header').next().scope();
-                $timeout(function () {
-                    scope.$apply(function () {
+                $timeout(function ()
+                {
+                    scope.$apply(function ()
+                    {
                         scope.nav.go(parseInt(currentFolderId));
                     });
                 }, 0);
             });
-            
+
         }
-        
+
         /**
          * Handle share folder direct download of all files.
          */
-        function handleShareFolderDirectDownloadOfAllFiles() {
+        function handleShareFolderDirectDownloadOfAllFiles()
+        {
             const $files = $('.the-file ul li');
-            
-            $.each($files, function () {
-                if (requestUrlPrefix == 'www.') {
+
+            $.each($files, function ()
+            {
+                if (requestUrlPrefix == 'www.')
+                {
                     startDirectDownloadOfFileByPageUrl($(this).find('a').attr('href'));
-                } else {
+                } else
+                {
                     startDirectDownloadOfFileByPageUrl($(this).find('a').attr('href').replace('www.', ''));
                 }
-                
+
             });
         }
-        
+
         /**
          * Handle share folder direct download of all files as link.
          */
-        function handleShareFolderDirectDownloadLinkOfAllFiles() {
+        function handleShareFolderDirectDownloadLinkOfAllFiles()
+        {
             const $files = $('.the-file ul li');
-            $.each($files, function () {
+            $.each($files, function ()
+            {
                 let downloadPageUrl = $(this).find('a').attr('href');
-                if (requestUrlPrefix !== 'www.') {
+                if (requestUrlPrefix !== 'www.')
+                {
                     downloadPageUrl = downloadPageUrl.replace('www.', '');
                 }
-                getFileDirectDownloadUrlByDownloadPageUrl(downloadPageUrl, function (directLink) {
+                getFileDirectDownloadUrlByDownloadPageUrl(downloadPageUrl, function (directLink)
+                {
                     directDownloadLinksList.push(directLink);
                     renderDirectDownloadListModal();
                 });
             });
         }
-        
+
         /**
          * Handle share folder direct download of all files as link.
          */
-        function handleShareFolderDirectDownloadOfItem(url) {
-            if (requestUrlPrefix == 'www.') {
+        function handleShareFolderDirectDownloadOfItem(url)
+        {
+            if (requestUrlPrefix == 'www.')
+            {
                 startDirectDownloadOfFileByPageUrl(url);
-            } else {
+            } else
+            {
                 startDirectDownloadOfFileByPageUrl(url.replace('www.', ''));
             }
         }
-        
+
         /**
          * Handle Instagram Leech.
          */
-        function handleInstagramLeech() {
+        function handleInstagramLeech()
+        {
             console.log('Handle Instagram Leech');
             const $instagramLeecherInput = $('#instagram_leecher_input');
             const $instagramLeecherStatus = $('#instagram_leecher_status');
             const $doInstagramLeechButton = $('#do_instagram_leech');
-            
+
             const share_url = $instagramLeecherInput.val();
             console.log('Instagram Share URL: ' + share_url);
-            if (share_url) {
+            if (share_url)
+            {
                 $instagramLeecherStatus.html('<div style="padding: 10px; text-align: center"><span class="glyphicon glyphicon-refresh glyphicon-refresh-animate" style="font-size: 40px; color: #4CAF50;"></span></div>');
                 console.log('Instagram Share URL is OK.');
                 console.log('Getting Instagram Post By cors.io: ' + share_url);
@@ -1458,31 +1740,38 @@
                     xhrFields: {
                         withCredentials: false
                     },
-                    success: function (response) {
+                    success: function (response)
+                    {
                         console.log('Success Getting Instagram Post By cors.io');
                         const instagramVideoUrlRegex = /<meta property="og:video" content="(.*)" /i;
                         const instagramVideoUrl = instagramVideoUrlRegex.exec(response);
-                        if (instagramVideoUrl) {
+                        if (instagramVideoUrl)
+                        {
                             console.log('Video Found in instagram post: ' + instagramVideoUrl[1]);
                             const currentFolderId = getCurrentFolderId();
-                            submitItemToLeecher(instagramVideoUrl[1], currentFolderId, function (error) {
-                                if (error) {
+                            submitItemToLeecher(instagramVideoUrl[1], currentFolderId, function (error)
+                            {
+                                if (error)
+                                {
                                     console.log('Submitting Instagram video to leech server error');
                                     $instagramLeecherStatus.html('<div id="chosen_idm_export_as_text_to_leech_file_name" class="bg-danger">خطا در ارسال برای ریموت.</div>');
                                     $doInstagramLeechButton.prop("disabled", false);
-                                } else {
+                                } else
+                                {
                                     console.log('Submitting Instagram video to leech server Success');
                                     $instagramLeecherStatus.html('<div id="chosen_idm_export_as_text_to_leech_file_name" class="bg-success">با موفقیت برای ریموت ارسال شد.</div>');
                                     $doInstagramLeechButton.prop("disabled", false);
                                 }
                             });
-                        } else {
+                        } else
+                        {
                             console.log('No Video URL found in instagram post');
                             $instagramLeecherStatus.html('<div id="chosen_idm_export_as_text_to_leech_file_name" class="bg-danger">خطا در دریافت فایل ویدیو.</div>');
                             $doInstagramLeechButton.prop("disabled", false);
                         }
                     },
-                    error: function () {
+                    error: function ()
+                    {
                         console.log('Error in cors.io');
                         console.log('Getting Instagram Post By crossorigin.me: ' + share_url);
                         $.ajax({
@@ -1491,31 +1780,38 @@
                             xhrFields: {
                                 withCredentials: false
                             },
-                            success: function (response) {
+                            success: function (response)
+                            {
                                 console.log('Success Getting Instagram Post By crossorigin.me');
                                 const instagramVideoUrlRegex = /<meta property="og:video" content="(.*)" /i;
                                 const instagramVideoUrl = instagramVideoUrlRegex.exec(response);
-                                if (instagramVideoUrl) {
+                                if (instagramVideoUrl)
+                                {
                                     console.log('Video Found in instagram post: ' + instagramVideoUrl[1]);
                                     const currentFolderId = getCurrentFolderId();
-                                    submitItemToLeecher(instagramVideoUrl[1], currentFolderId, function (error) {
-                                        if (error) {
+                                    submitItemToLeecher(instagramVideoUrl[1], currentFolderId, function (error)
+                                    {
+                                        if (error)
+                                        {
                                             console.log('Submitting Instagram video to leech server error');
                                             $instagramLeecherStatus.html('<div id="chosen_idm_export_as_text_to_leech_file_name" class="bg-danger">خطا در ارسال برای ریموت.</div>');
                                             $doInstagramLeechButton.prop("disabled", false);
-                                        } else {
+                                        } else
+                                        {
                                             console.log('Submitting Instagram video to leech server Success');
                                             $instagramLeecherStatus.html('<div id="chosen_idm_export_as_text_to_leech_file_name" class="bg-success">با موفقیت برای ریموت ارسال شد.</div>');
                                             $doInstagramLeechButton.prop("disabled", false);
                                         }
                                     });
-                                } else {
+                                } else
+                                {
                                     console.log('No Video URL found in instagram post');
                                     $instagramLeecherStatus.html('<div id="chosen_idm_export_as_text_to_leech_file_name" class="bg-danger">خطا در دریافت فایل ویدیو.</div>');
                                     $doInstagramLeechButton.prop("disabled", false);
                                 }
                             },
-                            error: function () {
+                            error: function ()
+                            {
                                 console.log('Error in crossorigin.me');
                                 $instagramLeecherStatus.html('<div id="chosen_idm_export_as_text_to_leech_file_name" class="bg-danger">خطا در دریافت صفحه.</div>');
                                 $doInstagramLeechButton.prop("disabled", false);
@@ -1523,24 +1819,26 @@
                         });
                     }
                 });
-            } else {
+            } else
+            {
                 $instagramLeecherStatus.html('<div id="chosen_idm_export_as_text_to_leech_file_name" class="bg-danger">هیچ آدرسی وارد نشده است.</div>');
                 $doInstagramLeechButton.prop("disabled", false);
             }
         }
-        
+
         /**
          * Check shatelland leecher servers status.
          */
         let count = 0;
-        
-        function checkServerStatuses(callback) {
-            for (let serverId in shatellandLeecherServers) {
+        function checkServerStatuses(callback)
+        {
+            for (let serverId in shatellandLeecherServers)
+            {
                 checkServerById(serverId, callback);
             }
             renderLeecherServersSelectAndStatus();
         }
-        
+
         function checkServerById(serverId, callback) {
             $.ajax({
                 type: "GET",
@@ -1549,32 +1847,39 @@
                     withCredentials: true
                 },
                 url: shatellandLeecherServers[serverId].address,
-                error: function (xhr) {
+                error: function (xhr)
+                {
                     count++;
-                    if (xhr.status == 405) {
+                    if (xhr.status == 405)
+                    {
                         shatellandLeecherServers[serverId].status = 1;
-                    } else {
+                    } else
+                    {
                         shatellandLeecherServers[serverId].status = 0;
                     }
-                    
+
                     renderLeecherServersSelectAndStatus();
-                    if (count == Object.keys(shatellandLeecherServers).length) {
-                        if (callback) {
+                    if (count == Object.keys(shatellandLeecherServers).length)
+                    {
+                        if (callback)
+                        {
                             callback();
                         }
                     }
                 }
             });
         }
-        
+
         /**
          * Render Server status and select
          */
-        function renderLeecherServersSelectAndStatus() {
+        function renderLeecherServersSelectAndStatus()
+        {
             const $leecherServersSelectWrapper = $('#leecher_servers_select_wrapper');
             let html = ``;
             html += `<span class="btn btn-default refresh-server-statuses"><i class="glyphicon glyphicon-refresh"></i></span>`;
-            for (let serverId in shatellandLeecherServers) {
+            for (let serverId in shatellandLeecherServers)
+            {
                 html += `
                     <span class="btn btn-default leecher-server-button server-${serverId} ${shatellandLeecherServers[serverId].status ? 'btn-success' : 'btn-danger'}${(serverId == leecherServerId ) ? ' active' : ''}" style="direction: rtl" data-id="${serverId}">
                         ${shatellandLeecherServers[serverId].text}
@@ -1582,23 +1887,26 @@
                     </span> 
                 `;
             }
-            
+
+
             $leecherServersSelectWrapper.html(html);
         }
-        
+
         /**
          * Change server button click.
          * @param serverId
          */
-        function handleLeecherServerSelect(serverId) {
-            if (leecherServerId != serverId) {
+        function handleLeecherServerSelect(serverId)
+        {
+            if (leecherServerId != serverId)
+            {
                 store.set(LEECHER_SERVER_ID_KEY, serverId);
                 leecherServerId = serverId;
                 renderLeecherServersSelectAndStatus();
             }
         }
     };
-    
+
     /**
      * Inject main script to page.
      *
@@ -1611,5 +1919,5 @@
     mainScript.type = "text/javascript";
     mainScript.textContent = '(' + ShatellandAdvancedFeaturesMain.toString() + ')();';
     document.body.appendChild(mainScript);
-    
+
 })();
