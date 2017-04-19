@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shatelland Upload Center Advanced Features
 // @namespace    http://allii.ir/
-// @version      3.2.5
+// @version      3.2.4
 // @description  Add new and advanced features to Shatelland upload center
 // @author       Alireza Dabiri Nejad | alireza.dabirinejad@live.com | http://allii.ir
 // @include      http*://*shatelland.com/upload*
@@ -89,16 +89,15 @@
          */
         const shatellandLeecherServers = {
             dl1: {
-                text: 'سرور 1',
+                text: 'DL1',
                 address: 'https://dl1.shatelland.com/api/Leech',
                 status: 0
             },
             dl3: {
-                text: 'سرور 3',
-                address: 'https://dl3.shatelland.com/api/Leech',
+                text: 'DL3',
+                address: 'http://dl3.shatelland.com/api/Leech',
                 status: 0
-            },
-            
+            }
         };
         
         /**
@@ -344,7 +343,7 @@
          * Leecher Servers select and status
          * @type {string}
          */
-        const leecherServersSelectAndStatusHTML = `<div id="leecher_servers_select_wrapper"  class="btn-group" style="direction: ltr" data-toggle="buttons"></div>`;
+        const leecherServersSelectAndStatusHTML = `<div id="leecher_servers_select_wrapper"  class="btn-group" style="direction: ltr" data-toggle="buttons">انتخاب سرور</div>`;
         
         /**
          * Setup all ajax requests.
@@ -372,113 +371,7 @@
          */
         console.log('Adding custom styles.');
         $('head').append($('<style/>').html(`
-.folders-tree .tree-list ul li a{direction: ltr!important;}
-.uploadPage .uploadPage-sidebar .up-s-container .progressLimit{direction: ltr!important;}
-#sh-upload-center {
-    direction: rtl!important;
-}
-.uploadPage{padding: 13px 20px 0!important;}
-.upload-queue {
-    right: auto!important;
-    left: 230px!important;
-}
-.file-manager-container .fm-item .item-iconHolder{float:left!important}
-
-.btn-group-vertical>.btn, .btn-group>.btn {
-    position: relative!important;
-    float: left!important;
-    padding: 10.2px!important;
-}
-.up-s-help {
-    display: none!important;
-}
-
-.leech-box {
-    text-align: right!important;
-    padding: 0 10px 10px 10px!important;
-    direction: rtl!important;
-    min-width: 170px!important;
-    margin: 27px auto 10px auto!important;
-    left: 20px!important;
-    right: auto !important;
-    width: 190px!important;
-    bottom: 5px!important;
-}
-.file-manager-container .fm-item:nth-child(even) {
-    background: #f7f7f7;
-}
-
-.leech-box .percent {
-    display: inline-block!important;
-    margin: 0 5px!important;
-    position: relative!important;
-    top: 6px!important;
-}
-.file-manager-container .file-manager-holder .files-list {
-    max-height: calc(100vh - 189px)!important;
-    overflow: auto!important;
-    padding: 0px!important;
-}
-.file-manager-container .topHeader-fileManager {
-    background-color: #eee!important;
-    border-radius: 3px!important;
-    margin-bottom: 10px!important;
-    height: 48px!important;
-    padding: 5px!important;
-    direction: ltr;
-}
-.file-manager-container .topHeader-fileManager .btn {
-    height: 32px!important;
-    width: 32px!important;
-}
-.uploadPage .uploadPage-sidebar .progress {
-    height: 2px!important;
-    margin-bottom: 5px!important;
-}
-.uploadPage .uploadPage-sidebar .up-s-container {
-    background-color: #eeeeee!important;
-    padding: 15px 15px 10px 15px!important;
-}
-
-.folders-tree .tree-list ul ul li.item:first-child {
-    margin: 0px 0px 5px 0px!important;
-}
-.folders-tree .tree-list ul ul li.item {
-    padding: 5px 0px 0px 0px!important;
-    border-top: 1px solid rgba(197, 197, 197, 0.55)!important;
-    margin: 5px 0px 5px 0px!important;
-}
-
-.folders-tree .tree-list ul ul {
-    padding-top: 5px!important;
-}
-.folders-tree .tree-list ul {
-    margin-left: 0px!important;
-}
-.folders-tree {
-    padding: 12px 11px!important;
-}
-
-.btn-success.active, .btn-success.focus, .btn-success:active, .btn-success:focus, .btn-success:hover, .open>.dropdown-toggle.btn-success {
-    color: #fff!important;
-    background-color: #26d082!important;
-    border-color: #cccccc!important;
-}
-.btn-success {
-    color: #3c3c3c!important;
-    background-color: #f7f7f7!important;
-    border-color: #cccccc!important;
-}
-.folders-tree .tree-list ul li.item.active-folder > a > span.folder-name {
-    color: #4a4a4a!important
-}
-.folders-tree .tree-list ul li.item.active-folder > a {
-    background: #ffffff!important;
-    padding: 5px 5px 5px 11px!important;
-}
-
-.file-name{overflow: hidden;}
-#line_separated_urls_leech_textarea, #direct_download_links_list_textarea {
+                #line_separated_urls_leech_textarea, #direct_download_links_list_textarea {
                     width: 100%;
                     min-height: 200px;
                     resize: none;
@@ -506,16 +399,14 @@
                 
                 #manage_leech_items_list_button {
                     position: fixed;
-                    bottom: 15px;
+                    bottom: 10px;
                     right: 40px;
-                    background: #337AB7;
+                    background: #3F51B5;
                     color: #fff;
                     padding: 10px;
                     font-size: 14px;
-					border: 1px solid #bbbbbb;
-                    border-radius: 4px;
                 }
-
+                
                 .modal-body {
                     max-height: 400px;
                     overflow: auto;
@@ -571,20 +462,18 @@
                 }
                 
                 .folders-tree {
-                    max-height: calc(100vh - 150px - 150px - 81px - 30px - 100px) !important;
+                    max-height: calc(100vh - 90px - 150px - 61px - 30px - 100px) !important;
                 }
                 
                 #extra_leecher_manager_button {
-                   position: fixed;
-                   bottom: 15px;
-                   right: 190px;
-                   background: #8e8e8e;
-                   color: #fff;
-                   padding: 10px;
-                   font-size: 14px;
-                   border: 1px solid #bbbbbb;
-                   border-radius: 4px;
-}
+                    position: fixed;
+                    bottom: 10px;
+                    right: 190px;
+                    background: #1A237E;
+                    color: #fff;
+                    padding: 10px;
+                    font-size: 14px;
+                }
                 
                 .glyphicon-refresh-animate {
                     -animation: spin 1s infinite linear;
@@ -603,8 +492,8 @@
                 
                 #leecher_servers_select_wrapper {
                     position: fixed;
-                    bottom: 15px;
-                    right: 241px;
+                    bottom: 55px;
+                    right: 40px;
                     font-size: 14px;
                 }
             `));
