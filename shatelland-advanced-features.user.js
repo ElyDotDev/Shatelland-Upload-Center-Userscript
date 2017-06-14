@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shatelland Upload Center Advanced Features
 // @namespace    http://allii.ir/
-// @version      3.2.6
+// @version      3.3.5
 // @description  Add new and advanced features to Shatelland upload center
 // @author       Alireza Dabiri Nejad | alireza.dabirinejad@live.com | http://allii.ir
 // @include      http*://*shatelland.com/upload*
@@ -93,11 +93,11 @@
                 address: 'https://dl1.shatelland.com/api/Leech',
                 status: 0
             },
-            dl3: {
+            /*dl3: {
                 text: 'DL3',
                 address: 'http://dl3.shatelland.com/api/Leech',
                 status: 0
-            }
+            }*/
         };
         
         /**
@@ -371,6 +371,22 @@
          */
         console.log('Adding custom styles.');
         $('head').append($('<style/>').html(`
+                .upload-queue {
+                    right: auto!important;
+                    left: 245px!important;
+                }
+                .leech-box {
+                    text-align: right!important;
+                    padding: 0 10px 10px 10px!important;
+                    direction: rtl!important;
+                    min-width: 170px!important;
+                    margin: 27px auto 10px auto!important;
+                    left: 20px!important;
+                    right: auto !important;
+                    width: 204px!important;
+                    bottom: 2px!important;
+                }
+                
                 #line_separated_urls_leech_textarea, #direct_download_links_list_textarea {
                     width: 100%;
                     min-height: 200px;
@@ -462,7 +478,7 @@
                 }
                 
                 .folders-tree {
-                    max-height: calc(100vh - 90px - 150px - 61px - 30px - 100px) !important;
+                    max-height: calc(100vh - 90px - 150px - 61px - 30px - 100px - 128px) !important;
                 }
                 
                 #extra_leecher_manager_button {
@@ -1128,24 +1144,73 @@
             console.log('Submitting item to leecher: ' + itemUrl + ' ' + itemFolderId);
             const leechHub = new SocketEngine("ws://namava.ir:8090", true);
             const myClientId = leechHub.connectionId;
+    
+            const injector = $('body').injector(), FileSystem = injector.get('UploadCenter.Service.FileSystem');
+    
+            FileSystem.leechManager(function (data) {
+                if(data.Info) {
+                    console.log('Currently leeching item.');
+                    callback('error');
+                } else {
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json",
+                        xhrFields: {
+                            withCredentials: true
+                        },
+                        url: shatellandLeecherServers[leecherServerId].address,
+                        data: JSON.stringify({
+                            Url: itemUrl,
+                            ConnectionId: myClientId,
+                            FolderId: itemFolderId
+                        })
+                    }).success(function (data) {
+                        console.log('Success', data);
+                        leechModalManager();
+                        callback();
+                    }).fail(function (ex, message, mmmm, koft) {
+                        callback('error');
+                    });
+                }
+            });
+        }
+        
+        function leechModalManager() {
+            const mainControllerScope = $('#sh-upload-center').scope();
+            const injector = $('body').injector(), FileSystem = injector.get('UploadCenter.Service.FileSystem');
             
-            $.ajax({
-                type: "POST",
-                contentType: "application/json",
-                xhrFields: {
-                    withCredentials: true
-                },
-                url: shatellandLeecherServers[leecherServerId].address,
-                data: JSON.stringify({
-                    Url: itemUrl,
-                    ConnectionId: myClientId,
-                    FolderId: itemFolderId
-                })
-            }).success(function (data) {
-                console.log('Success', data);
-                callback();
-            }).fail(function (ex, message, mmmm, koft) {
-                callback('error');
+            mainControllerScope.$apply(function () {
+                /**
+                 * Leech Manager
+                 */
+                mainControllerScope.currentLeech = null;
+                mainControllerScope.showSuccessLeechMessage = false;
+                let repeat = function () {
+                    FileSystem.leechManager(function (data) {
+                        $('.leech-modal').modal('hide');
+                        const actionsControllerScope = $('.actions-modal').scope();
+                        actionsControllerScope.$apply(function () {
+                            actionsControllerScope.actions.leech.url = '';
+                        });
+                        if (data.Info) {
+                            data.Info.Percentage = Math.round(data.Info.Percentage * 100) / 100;
+                            mainControllerScope.currentLeech = data;
+                            mainControllerScope.showSuccessLeechMessage = false;
+                        } else {
+                            clearInterval(repeatInerval);
+                    
+                            mainControllerScope.showSuccessLeechMessage = true;
+                            setTimeout(function () {
+                                mainControllerScope.$apply(function () {
+                                    mainControllerScope.currentLeech = null;
+                                    mainControllerScope.showSuccessLeechMessage = null;
+                                });
+                            }, 5000);
+                        }
+                    });
+                };
+                repeat();
+                let repeatInerval = setInterval(repeat, 1000);
             });
         }
         
@@ -1579,7 +1644,7 @@
                     <span class="btn btn-default leecher-server-button server-${serverId} ${shatellandLeecherServers[serverId].status ? 'btn-success' : 'btn-danger'}${(serverId == leecherServerId ) ? ' active' : ''}" style="direction: rtl" data-id="${serverId}">
                         ${shatellandLeecherServers[serverId].text}
                         ${(serverId == leecherServerId ) ? ' <i class="glyphicon glyphicon-ok"></i>' : ''}
-                    </span> 
+                    </span>
                 `;
             }
             
