@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shatelland Upload Center Advanced Features
 // @namespace    http://allii.ir/
-// @version      3.3.5
+// @version      3.3.6
 // @description  Add new and advanced features to Shatelland upload center
 // @author       Alireza Dabiri Nejad | alireza.dabirinejad@live.com | http://allii.ir
 // @include      http*://*shatelland.com/upload*
@@ -371,22 +371,6 @@
          */
         console.log('Adding custom styles.');
         $('head').append($('<style/>').html(`
-                .upload-queue {
-                    right: auto!important;
-                    left: 245px!important;
-                }
-                .leech-box {
-                    text-align: right!important;
-                    padding: 0 10px 10px 10px!important;
-                    direction: rtl!important;
-                    min-width: 170px!important;
-                    margin: 27px auto 10px auto!important;
-                    left: 20px!important;
-                    right: auto !important;
-                    width: 204px!important;
-                    bottom: 2px!important;
-                }
-                
                 #line_separated_urls_leech_textarea, #direct_download_links_list_textarea {
                     width: 100%;
                     min-height: 200px;
@@ -415,8 +399,8 @@
                 
                 #manage_leech_items_list_button {
                     position: fixed;
-                    bottom: 10px;
-                    right: 40px;
+                    bottom: 0;
+                    right: 20px;
                     background: #3F51B5;
                     color: #fff;
                     padding: 10px;
@@ -478,13 +462,13 @@
                 }
                 
                 .folders-tree {
-                    max-height: calc(100vh - 90px - 150px - 61px - 30px - 100px - 128px) !important;
+                    max-height: calc(100vh - 90px - 150px - 61px - 30px - 100px) !important;
                 }
                 
                 #extra_leecher_manager_button {
                     position: fixed;
-                    bottom: 10px;
-                    right: 190px;
+                    bottom: 0;
+                    right: 170px;
                     background: #1A237E;
                     color: #fff;
                     padding: 10px;
@@ -508,9 +492,74 @@
                 
                 #leecher_servers_select_wrapper {
                     position: fixed;
-                    bottom: 55px;
-                    right: 40px;
+                    bottom: 0;
+                    right: 220px;
                     font-size: 14px;
+                }
+                
+                #leecher_servers_select_wrapper.btn-group>.btn {
+                    border-radius: 0px!important;
+                    padding: 10px 12px!important;
+                    border: 0!important;
+                    
+                }
+                
+                .refresh-server-statuses {
+                    background: #f0f0f0;
+                }
+                
+                .upload-queue {
+                    right: auto!important;
+                    left: 245px!important;
+                }
+                
+                .leech-box {
+                    right: 337px!important;
+                    bottom: -1px!important;
+                    width: 100px!important;
+                    min-width: 320px!important;
+                    margin: 0!important;
+                    font-size: 0px;
+                    padding: 5px 5px!important;
+                    border-radius: 0px;
+                    background: #f0f0f0;
+                    border: 0px !important;
+                }
+                
+                .leech-box input {
+                    display: block!important;
+                    width: 52%!important;
+                    padding: 0 5px;
+                    border: 1px solid #CDCDCD;
+                    border-radius: 3px;
+                    font-size: 10px!important;
+                    float: right;
+                }
+                
+                .leech-box .btn-hide-currentLeech {
+                    margi-top: 0px!important;
+                    display: block;
+                    width: 20%;
+                    float: left;
+                    margin-top: 0!important;
+                }
+                
+                .leech-box .percent {
+                    font-size: 10px!important;
+                    width: 25%;
+                    display: block!important;
+                    float: right;
+                    margin: 0px!important;
+                    margin-right: 3%!important;
+                    padding-top: 3px;
+                }
+                
+                .file-manager-container .file-manager-holder .files-list {
+                    max-height: calc(100vh - 233px) !important;
+                }
+                
+                .uploadQueue-header {
+                    border-radius: 0px!important;
                 }
             `));
         
