@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shatelland Upload Center Advanced Features
 // @namespace    http://allii.ir/
-// @version      3.4.2
+// @version      3.5.0
 // @description  Add new and advanced features to Shatelland upload center
 // @author       Alireza Dabiri Nejad | alireza.dabirinejad@live.com | http://allii.ir
 // @include      http*://*shatelland.com/upload*
@@ -85,18 +85,22 @@
     
         /**
          * Shatelland Leech Servers
-         * @type {{dl1: {text: string, address: string, status: number}, dl4: {text: string, address: string, status: number}}}
+         * @type {{dl1: {text: string, address: string, currentUserAddress: string, status: number, interval: number}, dl4: {text: string, address: string, currentUserAddress: string, status: number, interval: number}}}
          */
         const shatellandLeecherServers = {
             dl1: {
                 text: 'DL1',
                 address: 'https://dl1.shatelland.com/api/Leech',
-                status: 0
+                currentUserAddress: 'https://dl1.shatelland.com/api/LeechManager/currentuser',
+                status: 0,
+                interval: 0
             },
             dl4: {
                 text: 'DL4',
                 address: 'http://dl4.shatelland.com/api/Leech',
-                status: 0
+                currentUserAddress: 'https://dl4.shatelland.com/api/LeechManager/currentuser',
+                status: 0,
+                interval: 0
             }
         };
         
@@ -346,9 +350,18 @@
         const leecherServersSelectAndStatusHTML = `<div id="leecher_servers_select_wrapper"  class="btn-group" style="direction: ltr" data-toggle="buttons">انتخاب سرور</div>`;
         
         /**
+         * Current Leccher files percentage and cancle manager HTML.
+         * @type {string}
+         */
+        const currentLeecherServerFilesManagerHtml = `<div id="current_leecher_server_files_manager"></div>`;
+        
+        /**
          * Setup all ajax requests.
          */
-        $.ajaxSetup({ cache: true, xhrFields: { withCredentials: true } });
+        $.ajaxSetup({
+            cache: true,
+            xhrFields: { withCredentials: true }
+        });
         
         /**
          * Load Store.js
@@ -365,6 +378,22 @@
          */
         console.log('Loading Filesaver.js');
         $.getScript('https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js');
+        
+        /**
+         * Loading circle-progress.js
+         */
+        console.log('Loading circle-progress.js');
+        $.getScript('https://cdnjs.cloudflare.com/ajax/libs/jquery-circle-progress/1.2.2/circle-progress.min.js', function () {
+            renderCurrentLeecherServerFilesManager();
+        });
+    
+        /**
+         * Loading Clipboard.js
+         */
+        console.log('Loading clipboard.js');
+        $.getScript('https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js', function () {
+            new Clipboard('.copy-button');
+        });
         
         /**
          * Add custom styles as a style tag to page head.
@@ -510,10 +539,11 @@
                 
                 .upload-queue {
                     right: auto!important;
-                    left: 245px!important;
+                    left: 20px!important;
                 }
                 
                 .leech-box {
+                    /*
                     right: 337px!important;
                     bottom: -1px!important;
                     width: 100px!important;
@@ -524,8 +554,10 @@
                     border-radius: 0px;
                     background: #f0f0f0;
                     border: 0px !important;
+                    */
                 }
                 
+                /*
                 .leech-box input {
                     display: block!important;
                     width: 52%!important;
@@ -553,6 +585,7 @@
                     margin-right: 3%!important;
                     padding-top: 3px;
                 }
+                */
                 
                 .file-manager-container .file-manager-holder .files-list {
                     max-height: calc(100vh - 233px) !important;
@@ -560,6 +593,150 @@
                 
                 .uploadQueue-header {
                     border-radius: 0px!important;
+                }
+                
+                #current_leecher_server_files_manager {
+                    position: fixed;
+                    background: #f0f0f0;
+                    height: 40px;
+                    width: 506px;
+                    right: 383px;
+                    bottom: 0;
+                    box-sizing: border-box;
+                }
+                
+                #current_leecher_server_files_manager .leecher-server {
+                    float: right;
+                    width: 253px;
+                    height: 40px;
+                    box-sizing: border-box;
+                    position: relative;
+                }
+               
+                
+                .server-id {
+                    float: left;
+                    font-size: 10px;
+                    background: #0681c4;
+                    color: #fff;
+                    padding: 15px 5px;
+                    font-weight: bold;
+                }
+                
+                .no-file-status {
+                    direction: rtl;
+                    text-align: right;
+                    float: left;
+                    width: 210px;
+                    margin: 0 5px;
+                    color: #aaa;
+                    font-size: 14px;
+                    height: 40px;
+                    padding-top: 11px;
+                    display: none;
+                }
+                
+                .file-address {
+                    float: left;
+                    width: 173px;
+                    margin: 0 5px;
+                }
+                
+                .file-address-input {
+                    border: 0;
+                    background: #f0f0f0;
+                    color: #666;
+                    direction: ltr;
+                    text-align: left;
+                    font-size: 10px;
+                    width: 100%;
+                    height: 40px;
+                    padding-top: 5px;
+                }
+                
+                .animated-button {
+                    position: absolute;
+                    top: -40px;
+                    right: 0;
+                    width: 76px;
+                    height: 40px;
+                    display: none;
+                }
+                
+                .cancle-button {
+                    float: right;
+                    padding: 10px;
+                    font-size: 18px;
+                    color: #fff;
+                    background: #ff1e41;
+                    cursor: pointer;
+                    box-sizing: border-box;
+                    height: 40px;
+                }
+                
+                .cancle-button:hover {
+                   background: #ff5f43;
+                }
+                
+                .copy-button {
+                    float: right;
+                    padding: 10px;
+                    font-size: 18px;
+                    color: #fff;
+                    background: #0681c4;
+                    cursor: pointer;
+                    box-sizing: border-box;
+                    height: 40px;
+                }
+                
+                .copy-button:hover {
+                   background: #4ac5f8;
+                }
+                
+                .total-size {
+                    float: right;
+                    direction: ltr;
+                    font-size: 11px;
+                    padding: 15px 5px;
+                    color: #999;
+                    display: none;
+                }
+                
+                .circle-progress {
+                    float: right;
+                    padding: 6px 5px 0 5px;
+                    position: relative;
+                    width: 30px;
+                    margin-left: 8px;
+                }
+                
+                .circle-progress span {
+                    position: absolute;
+                    top: 16px;
+                    left: 4px;
+                    font-size: 9px;
+                    text-align: center;
+                    width: 11px;
+                    color: #999;
+                }
+                
+                .tooltip {
+                    font-family: 'BYekan',Verdana,Tahoma,Arial;
+                }
+                
+                input:focus,
+                select:focus,
+                textarea:focus,
+                button:focus {
+                    outline: none;
+                }
+                
+                #current_leecher_server_files_manager .leecher-server.no-file .current-file-data {
+                    display: none;
+                }
+                
+                #current_leecher_server_files_manager .leecher-server.no-file .no-file-status {
+                    display: block;
                 }
             `));
         
@@ -595,6 +772,7 @@
             if (!isSubmittingLeecherQueue) {
                 isSubmittingLeecherQueue = true;
                 startLeechQueueSubmit();
+                //handleCurrentLeecherServersFileStatus();
             }
         }, 5000);
         
@@ -697,7 +875,9 @@
          * Inject direct download link of sharefolder each items
          */
         $('.the-file ul li').each(function () {
-            const directDownloadLinkURL = $(this).find('a').attr('href'), directDownloadLink = $(shareFolderDirectDownloadLinkOfItemLinkHTML).attr('href', directDownloadLinkURL), downloadItemIndex = $(this).find('.btn-info');
+            const directDownloadLinkURL = $(this).find('a').attr('href'),
+                directDownloadLink = $(shareFolderDirectDownloadLinkOfItemLinkHTML).attr('href', directDownloadLinkURL),
+                downloadItemIndex = $(this).find('.btn-info');
             $(this).find('.btn-group').prepend(directDownloadLink);
             $(this).find('.btn-group').prepend(downloadItemIndex);
         });
@@ -809,6 +989,7 @@
                 item.status = 1;
                 store.set(itemGUID, item);
                 leecherItemsQueueList.unshift(itemGUID);
+                store.set(LEECHER_ITEMS_QUEUE_LIST_KEY, leecherItemsQueueList);
             }
             renderManageLeechItemsListTable();
         });
@@ -917,6 +1098,36 @@
                     $this.find('i').removeClass('glyphicon-refresh-animate ');
                 });
             }, 500);
+        });
+    
+        /**
+         * Handle mouseover on leech server status manager box
+         */
+        $body.on('mouseover', '.leecher-server', function () {
+            if (!$(this).hasClass('no-file')) {
+                $(this).find('.animated-button').stop().fadeTo(300, 1);
+            }
+        });
+    
+        /**
+         * Handle mouseout on leech server status manager box
+         */
+        $body.on('mouseout', '.leecher-server', function () {
+                $(this).find('.animated-button').stop().fadeTo(200, 0);
+        });
+    
+        /**
+         * Handle cancle the leech server file leeching
+         */
+        $body.on('click', '.cancle-button', function () {
+            const server_id = $(this).attr('data-id');
+            if(shatellandLeecherServers.hasOwnProperty(server_id)) {
+                $.get(shatellandLeecherServers[server_id].currentUserAddress + '/cancel').then(function () {
+                    handleCurrentLeecherServersFileStatus(server_id);
+                }).fail( function (e) {
+                    console.log(e);
+                });
+            }
         });
         
         /**
@@ -1058,7 +1269,9 @@
          * Submit internet download manager (IDM) exported text file to leech input
          */
         function submitIdmExportAsTextToLeechInput() {
-            const $idmExportAsTextToLeechInput = $('#idm_export_as_text_to_leech_input'), idmExportAsTextToLeechFile = $idmExportAsTextToLeechInput.get(0).files[0], fileReader = new FileReader(), fileExtensionRegex = /(?:\.([^.]+))?$/;
+            const $idmExportAsTextToLeechInput = $('#idm_export_as_text_to_leech_input'),
+                idmExportAsTextToLeechFile = $idmExportAsTextToLeechInput.get(0).files[0],
+                fileReader = new FileReader(), fileExtensionRegex = /(?:\.([^.]+))?$/;
             
             fileReader.onload = function (event) {
                 const lineSeparatedUrlsLeechArray = convertLineSeparatedUrlsToArray(event.target.result);
@@ -1194,10 +1407,8 @@
             const leechHub = new SocketEngine("ws://namava.ir:8090", true);
             const myClientId = leechHub.connectionId;
     
-            const injector = $('body').injector(), FileSystem = injector.get('UploadCenter.Service.FileSystem');
-    
-            FileSystem.leechManager(function (data) {
-                if(data.Info) {
+            getLeecherServerStatus(leecherServerId).done(function (data) {
+                if (data !== null) {
                     console.log('Currently leeching item.');
                     callback('error');
                 } else {
@@ -1215,23 +1426,25 @@
                         })
                     }).success(function (data) {
                         console.log('Success', data);
-                        leechModalManager();
+                        //leechModalManager();
+                        handleCurrentLeecherServersFileStatus(leecherServerId);
                         callback();
                     }).fail(function (ex, message, mmmm, koft) {
                         callback('error');
                     });
                 }
+            }).fail(function () {
+                callback('error');
             });
         }
         
+        /*
         function leechModalManager() {
             const mainControllerScope = $('#sh-upload-center').scope();
             const injector = $('body').injector(), FileSystem = injector.get('UploadCenter.Service.FileSystem');
             
             mainControllerScope.$apply(function () {
-                /**
-                 * Leech Manager
-                 */
+ 
                 mainControllerScope.currentLeech = null;
                 mainControllerScope.showSuccessLeechMessage = false;
                 let repeat = function () {
@@ -1247,7 +1460,7 @@
                             mainControllerScope.showSuccessLeechMessage = false;
                         } else {
                             clearInterval(repeatInerval);
-                    
+                            
                             mainControllerScope.showSuccessLeechMessage = true;
                             setTimeout(function () {
                                 mainControllerScope.$apply(function () {
@@ -1262,6 +1475,7 @@
                 let repeatInerval = setInterval(repeat, 1000);
             });
         }
+        */
         
         /**
          * Handle direct download selected items.
@@ -1338,9 +1552,13 @@
                 }
             }
         }
-        
+    
+        /**
+         * Render Direct Download List Modal
+         */
         function renderDirectDownloadListModal() {
-            const $directDownloadListListularTBody = $('#direct_download_links_list_tbody'), $directDownloadListTextularText = $('#direct_download_links_list_textarea');
+            const $directDownloadListListularTBody = $('#direct_download_links_list_tbody'),
+                $directDownloadListTextularText = $('#direct_download_links_list_textarea');
             $directDownloadListListularTBody.html('');
             $directDownloadListTextularText.val(directDownloadLinksList.join('\n'));
             console.log(directDownloadLinksList.join('\n'));
@@ -1411,12 +1629,12 @@
         function startDirectDownloadOfFileByPageUrl(fileDownloadPageUrl) {
             getFileDirectDownloadUrlByDownloadPageUrl(fileDownloadPageUrl, function (downloadDirectUrl) {
                 console.log('Direct downloading of file: ' + downloadDirectUrl);
-        
+                
                 if (downloadDirectUrl) {
                     const $iframe = $('<iframe class="file-direct-download-iframe" src="' + downloadDirectUrl + '"></iframe>');
                     $('body').append($iframe);
                     console.log('Direct download of file iframe added.');
-                    setTimeout(function(){
+                    setTimeout(function () {
                         console.log('Direct download of file iframe removed.');
                         $iframe.remove();
                     }, DIRECT_DOWNLOAD_IFRAME_DURATION);
@@ -1491,7 +1709,9 @@
          * Handle refresh file manager
          */
         function handleRefreshFileManager() {
-            const currentFolderId = getCurrentFolderId(), injector = $('body').injector(), FileSystemRegistry = injector.get('UploadCenter.Service.FileSystemRegistry'), $timeout = injector.get('$timeout');
+            const currentFolderId = getCurrentFolderId(), injector = $('body').injector(),
+                FileSystemRegistry = injector.get('UploadCenter.Service.FileSystemRegistry'),
+                $timeout = injector.get('$timeout');
             
             let index = FileSystemRegistry.fetchedFolders.indexOf(currentFolderId);
             if (index > -1) {
@@ -1714,8 +1934,123 @@
             if (leecherServerId != serverId) {
                 store.set(LEECHER_SERVER_ID_KEY, serverId);
                 leecherServerId = serverId;
+                console.log('Leecher Server Changed to: ' + serverId);
                 renderLeecherServersSelectAndStatus();
             }
+        }
+    
+        /**
+         * Render current leecher server status that are bottom of page
+         */
+        function renderCurrentLeecherServerFilesManager() {
+            console.log('Render current leecher server files manager for first time.');
+            $body.append(currentLeecherServerFilesManagerHtml);
+            
+            for (const server_id in shatellandLeecherServers) {
+                $('#current_leecher_server_files_manager').append(`
+                    <div class="leecher-server no-file" id="leecher_server_file_${server_id}">
+                        <div class="server-id">${server_id.toUpperCase()}</div>
+                        <div class="no-file-status">هیچ فایلی در حال ریموت نمی باشد.</div>
+                        <div class="current-file-data">
+                            <div id="server_${server_id}_file_address" class="file-address" data-toggle="tooltip"
+                            title="آدرس فایل"><input
+                            class="file-address-input" type="text" value="" /></div>
+                            <div class="circle-progress" data-toggle="tooltip" title="درصد انتقال"><span></span></div>
+                        </div>
+                        <div class="animated-button">
+                            <div class="cancle-button" data-toggle="tooltip" title="لفو انتقال" data-id="${server_id}"><span
+                            class="glyphicon glyphicon-remove"></span></div>
+                            <div class="copy-button" data-toggle="tooltip" title="کپی آدرس" data-clipboard-target="#server_${server_id}_file_address"><span class="glyphicon glyphicon-copy"></span></div>
+                        </div>
+                    </div>
+                `);
+                $('#leecher_server_file_' + server_id + ' .circle-progress').circleProgress({
+                    value: 0,
+                    size: 30,
+                    emptyFill: "rgba(0, 0, 0, .1)",
+                    fill: '#31b0d5'
+                }).on('circle-animation-progress', function (event, progress, stepValue) {
+                    $(this).find('span').text(Math.round(stepValue.toFixed(2).substr(1) * 100));
+                });
+            }
+            $('[data-toggle="tooltip"]').tooltip();
+            handleCurrentLeecherServersFileStatus();
+        }
+    
+        /**
+         * Handle current leecher servers file status
+         * @param server_id
+         */
+        function handleCurrentLeecherServersFileStatus(server_id) {
+            console.log('Render current leecher servers file status.')
+            if(server_id) {
+                if(!shatellandLeecherServers[server_id].interval) {
+                    handleCurrentLeecherServerFileStatus(server_id);
+                }
+            } else {
+                for (const server_id in shatellandLeecherServers) {
+                    if(!shatellandLeecherServers[server_id].interval) {
+                        handleCurrentLeecherServerFileStatus(server_id);
+                    }
+                }
+            }
+        }
+    
+        /**
+         * Handle current leecher server file status
+         * @param server_id
+         */
+        function handleCurrentLeecherServerFileStatus(server_id) {
+            getLeecherServerStatus(server_id).done(function (data) {
+                if (data !== null) {
+                    if (!shatellandLeecherServers[server_id].interval) {
+                        shatellandLeecherServers[server_id].interval = setInterval(function () {
+                            handleCurrentLeecherServerFileStatus(server_id);
+                        }, 1000);
+                    }
+                } else {
+                    if (shatellandLeecherServers[server_id].interval) {
+                        console.log('Clearing interval ' + server_id);
+                        clearInterval(shatellandLeecherServers[server_id].interval);
+                        shatellandLeecherServers[server_id].interval = 0;
+                    }
+                }
+                renderCurrentLeecherServerFileStatus(server_id, data)
+            }).fail(function () {
+                console.log('Getting leech server file status error');
+            });
+        }
+    
+        /**
+         * Render current leecher server file status
+         * @param server_id
+         * @param data
+         */
+        function renderCurrentLeecherServerFileStatus(server_id, data) {
+            console.log('Render current leecher server '+ server_id +' file status.')
+            if (data !== null) {
+                $('#leecher_server_file_' + server_id).removeClass('no-file');
+                $('#leecher_server_file_' + server_id).find('.file-address-input').attr('value', data.Info.Url);
+                if(data.Info.Percentage > 0) {
+                    data.Info.Percentage /= 100;
+                } else {
+                    data.Info.Percentage = 0;
+                }
+                $('#leecher_server_file_' + server_id).find('.circle-progress').circleProgress('value', data.Info.Percentage);
+            } else {
+                $('#leecher_server_file_' + server_id).addClass('no-file');
+                $('#leecher_server_file_' + server_id).find('.file-address-input').attr('value', '');
+                $('#leecher_server_file_' + server_id).find('.circle-progress').circleProgress('value', 0);
+            }
+        }
+    
+        /**
+         * Get leecher server status by id
+         * @param server_id
+         * @returns {Promise}
+         */
+        function getLeecherServerStatus(server_id) {
+            return $.get(shatellandLeecherServers[server_id].currentUserAddress);
         }
     };
     
