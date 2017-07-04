@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shatelland Upload Center Advanced Features
 // @namespace    http://allii.ir/
-// @version      3.4.0
+// @version      3.4.1
 // @description  Add new and advanced features to Shatelland upload center
 // @author       Alireza Dabiri Nejad | alireza.dabirinejad@live.com | http://allii.ir
 // @include      http*://*shatelland.com/upload*
@@ -1411,9 +1411,15 @@
         function startDirectDownloadOfFileByPageUrl(fileDownloadPageUrl) {
             getFileDirectDownloadUrlByDownloadPageUrl(fileDownloadPageUrl, function (downloadDirectUrl) {
                 console.log('Direct downloading of file: ' + downloadDirectUrl);
-                
+        
                 if (downloadDirectUrl) {
-                    $('body').append('<iframe class="file-direct-download-iframe" src="' + downloadDirectUrl + '"></iframe>');
+                    const $iframe = $('<iframe class="file-direct-download-iframe" src="' + downloadDirectUrl + '"></iframe>');
+                    $('body').append($iframe);
+                    console.log('Direct download of file iframe added.');
+                    setTimeout(function(){
+                        console.log('Direct download of file iframe removed.');
+                        $iframe.remove();
+                    }, DIRECT_DOWNLOAD_IFRAME_DURATION);
                 }
             });
         }
