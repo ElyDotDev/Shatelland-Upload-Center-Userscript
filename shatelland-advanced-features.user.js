@@ -82,10 +82,10 @@
          * @type {string}
          */
         let leecherServerId = 'dl1';
-        
+    
         /**
          * Shatelland Leech Servers
-         * @type {{dl1: {text: string, address: string, status: number}, dl3: {text: string, address: string, status: number}}}
+         * @type {{dl1: {text: string, address: string, status: number}, dl4: {text: string, address: string, status: number}}}
          */
         const shatellandLeecherServers = {
             dl1: {
