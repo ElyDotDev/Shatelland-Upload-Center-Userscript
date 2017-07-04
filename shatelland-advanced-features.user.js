@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shatelland Upload Center Advanced Features
 // @namespace    http://allii.ir/
-// @version      3.3.6
+// @version      3.4.0
 // @description  Add new and advanced features to Shatelland upload center
 // @author       Alireza Dabiri Nejad | alireza.dabirinejad@live.com | http://allii.ir
 // @include      http*://*shatelland.com/upload*
@@ -93,11 +93,11 @@
                 address: 'https://dl1.shatelland.com/api/Leech',
                 status: 0
             },
-            /*dl3: {
-                text: 'DL3',
-                address: 'http://dl3.shatelland.com/api/Leech',
+            dl4: {
+                text: 'DL4',
+                address: 'http://dl4.shatelland.com/api/Leech',
                 status: 0
-            }*/
+            }
         };
         
         /**
