@@ -11,7 +11,7 @@
 
 (function () {
     'use strict';
-    
+
     const ShatellandAdvancedFeaturesMain = function () {
         console.log('Defining constants & variables.');
         /**
@@ -19,19 +19,19 @@
          * @type {string}
          */
         const LEECHER_ITEMS_LIST_KEY = 'leecher_items';
-        
+
         /**
          * Leecher queue item id list key in LocalStorage
          * @type {string}
          */
         const LEECHER_ITEMS_QUEUE_LIST_KEY = 'leecher_items_queue';
-        
+
         /**
          * Leecher server id
          * @type {string}
          */
         const LEECHER_SERVER_ID_KEY = 'leecher_server_id';
-        
+
         /**
          * File status of leecher
          * @type {{NOT_SUBMITTED: number, SUBMIT_ERROR: number, SUBMIT_SUCCESS: number}}
@@ -40,49 +40,49 @@
             NOT_SUBMITTED: 1, //SUBMIT_ERROR: 2,
             SUBMIT_SUCCESS: 3
         };
-        
+
         /**
          * Is FileReader supported in current browser?
          * @type {boolean}
          */
         let isFileReaderSupported = false;
-        
+
         /**
          * Is current page url contains www.?
          * @type {string}
          */
         let requestUrlPrefix = '';
-        
+
         /**
          * Is leecher queue being submitted?
          * @type {boolean}
          */
         let isSubmittingLeecherQueue = false;
-        
+
         /**
          * All the items in leecher.
          * @type {Array}
          */
         let leecherItemsList = [];
-        
+
         /**
          * Items not submitted to be leeched and are in submitting queue.
          * @type {Array}
          */
         let leecherItemsQueueList = [];
-        
+
         /**
          * List of direct download links.
          * @type {Array}
          */
         let directDownloadLinksList = [];
-        
+
         /**
          * Leecher Server Id
          * @type {string}
          */
         let leecherServerId = 'dl1';
-    
+
         /**
          * Shatelland Leech Servers
          * @type {{dl1: {text: string, address: string, currentUserAddress: string, status: number, interval: number}, dl4: {text: string, address: string, currentUserAddress: string, status: number, interval: number}}}
@@ -103,25 +103,25 @@
                 interval: 0
             }
         };
-        
+
         /**
          * HTML for line separated urls leech button.
          * @type {string}
          */
         const lineSeparatedUrlsLeechButtonHTML = `<a id="line_separated_urls_leech_button" class="btn btn-block">انتقال گروهی لیست فایل</a>`;
-        
+
         /**
          * HTML for internet download manager (IDM) exported text file to leech button.
          * @type {string}
          */
         const idmExportAsTextToLeechButtonHTML = `<a id="idm_export_as_text_to_leech_button" class="btn btn-block" style="direction: rtl">انتقال گروهی خروجی IDM</a>`;
-        
+
         /**
          * Manage leech items list button HTML
          * @type {string}
          */
         const manageLeechItemsListButtonHTML = `<a id="manage_leech_items_list_button">مدیریت فهرست ریموت</a>`;
-        
+
         /**
          *  HTML for line separated urls leech modal.
          * @type {string}
@@ -149,7 +149,7 @@
                 </div>
             </div>
         `;
-        
+
         /**
          *  HTML for download manager (IDM) exported text file to leech modal.
          * @type {string}
@@ -179,7 +179,7 @@
                 </div>
             </div>
         `;
-        
+
         /**
          * HTML for manage leech items list modal.
          */
@@ -212,19 +212,19 @@
                 </div>
             </div>
         `;
-        
+
         /**
          * HTML for direct download selected items button.
          * @type {string}
          */
         const directDownloadSelectedItemsButtonHtml = '<button id="direct_download_selected_items" class="btn btn-info"  data-original-title="" title=""><i class="glyphicon glyphicon-download"></i></button>';
-        
+
         /**
          * HTML for direct download link of selected items button.
          * @type {string}
          */
         const directDownloadLinkOfSelectedItemsButtonHtml = '<button id="direct_download_link_of_selected_items" class="btn btn-info"  data-original-title="" title=""><i class="glyphicon glyphicon-list"></i></button>';
-        
+
         /**
          *  HTML for line separated urls leech modal.
          * @type {string}
@@ -270,37 +270,37 @@
                 </div>
             </div>
         `;
-        
+
         /**
          * HTML for refresh file manager button.
          * @type {string}
          */
         const refreshFileManagerButtonHtml = '<button id="refresh_file_manager" class="btn btn-info"  data-original-title="" title=""><i class="glyphicon glyphicon-refresh"></i></button>';
-        
+
         /**
          * HTML for share Folder page direct download of all files.
          * @type {string}
          */
         const shareFolderDirectDownloadAllFilesHTML = `<button id="sharefolder_direct_download_of_all_files_button" class="btn btn-info"  data-original-title="" title=""><i class="glyphicon glyphicon-download"></i> دانلود مستقیم تمام فایل ها</button>`;
-        
+
         /**
          * HTML for share Folder page direct download of all files.
          * @type {string}
          */
         const shareFolderDirectDownloadAllFilesAsLinkHTML = `<button id="sharefolder_direct_download_of_all_files_as_link_button" class="btn btn-info"  data-original-title="" title=""><i class="glyphicon glyphicon-list"></i> لینک مستقیم تمام فایل ها</button>`;
-        
+
         /**
          * HTML for share Folder page direct download of all files.
          * @type {string}
          */
         const shareFolderDirectDownloadLinkOfItemLinkHTML = `<a href="#" class="btn btn-success direct-download-item">دانلود مستقیم</a>`;
-        
+
         /**
          * Extra leecher manager button HTML
          * @type {string}
          */
         const extraLeecherManagerButtonHTML = `<a id="extra_leecher_manager_button" href="#">لیچر</a>`;
-        
+
         /**
          *  HTML for Extra leecher manager modal.
          * @type {string}
@@ -342,19 +342,19 @@
                 </div>
             </div>
         `;
-        
+
         /**
          * Leecher Servers select and status
          * @type {string}
          */
         const leecherServersSelectAndStatusHTML = `<div id="leecher_servers_select_wrapper"  class="btn-group" style="direction: ltr" data-toggle="buttons">انتخاب سرور</div>`;
-        
+
         /**
          * Current Leccher files percentage and cancle manager HTML.
          * @type {string}
          */
         const currentLeecherServerFilesManagerHtml = `<div id="current_leecher_server_files_manager"></div>`;
-        
+
         /**
          * Setup all ajax requests.
          */
@@ -362,7 +362,7 @@
             cache: true,
             xhrFields: { withCredentials: true }
         });
-        
+
         /**
          * Load Store.js
          *
@@ -372,13 +372,13 @@
         $.getScript('https://cdnjs.cloudflare.com/ajax/libs/store.js/1.3.20/store.min.js', function () {
             storeJsLoaded();
         });
-        
+
         /**
          * Loading Filesaver.js
          */
         console.log('Loading Filesaver.js');
         $.getScript('https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js');
-        
+
         /**
          * Loading circle-progress.js
          */
@@ -386,7 +386,7 @@
         $.getScript('https://cdnjs.cloudflare.com/ajax/libs/jquery-circle-progress/1.2.2/circle-progress.min.js', function () {
             renderCurrentLeecherServerFilesManager();
         });
-    
+
         /**
          * Loading Clipboard.js
          */
@@ -394,7 +394,7 @@
         $.getScript('https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js', function () {
             new Clipboard('.copy-button');
         });
-        
+
         /**
          * Add custom styles as a style tag to page head.
          */
@@ -739,7 +739,7 @@
                     display: block;
                 }
             `));
-        
+
         console.log('Check FileReader support in current browser.');
         /**
          * Check FileReader support in current browser.
@@ -747,7 +747,7 @@
         if (window.FileReader && window.File && window.FileList && window.Blob) {
             isFileReaderSupported = true;
         }
-        
+
         /**
          * Check https or http?
          */
@@ -756,14 +756,14 @@
         if (urlParser.protocol == 'https:') {
             window.location.href = 'http:' + window.location.href.substring(window.location.protocol.length);
         }
-        
+
         /**
          * Check url contains www or not?
          */
         if (urlParser.origin.includes('www.')) {
             requestUrlPrefix = 'www.';
         }
-        
+
         /**
          * Start leech queue submit.
          */
@@ -774,8 +774,8 @@
                 startLeechQueueSubmit();
                 //handleCurrentLeecherServersFileStatus();
             }
-        }, 5000);
-        
+        }, 1000);
+
         console.log('Get common jQuery objects.');
         /**
          * Get common jQuery objects
@@ -785,92 +785,92 @@
         const $actionModals = $('.actions-modal');
         const $BtnNewFolder = $('.btn-newFolder');
         const $shareFolderTheFileHr = $('.the-file hr');
-        
+
         console.log('Inject custom UI elements to page.');
         /**
          * Inject line separated urls leech button.
          */
         $sidebarForm.append(lineSeparatedUrlsLeechButtonHTML);
-        
+
         /**
          * Inject internet download manager (IDM) exported text file to leech button.
          */
         if (isFileReaderSupported) {
             $sidebarForm.append(idmExportAsTextToLeechButtonHTML);
         }
-        
+
         /**
          * Inject line separated urls leech modal.
          */
         $actionModals.append(lineSeparatedUrlsLeechModalHTML);
-        
+
         /**
          * Inject internet download manager (IDM) exported text file to leech modal.
          */
         if (isFileReaderSupported) {
             $actionModals.append(idmExportAsTextToLeechModalHTML);
         }
-        
+
         /**
          * Inject manage leech items list button.
          */
         $actionModals.append(manageLeechItemsListButtonHTML);
-        
+
         /**
          * Inject manage leech items list modal.
          */
         $actionModals.append(manageLeechItemsListModalHTML);
-        
+
         /**
          * Inject direct download link.
          */
         $actionModals.append(directDownloadLinkOfSelectedItemsModalHtml);
-        
+
         /**
          * Inject direct download selected items.
          */
         $BtnNewFolder.before(directDownloadSelectedItemsButtonHtml);
-        
+
         /**
          * Inject direct download link of selected items.
          */
         $BtnNewFolder.before(directDownloadLinkOfSelectedItemsButtonHtml);
-        
+
         /**
          * Inject refresh file manager button.
          */
         $BtnNewFolder.before(refreshFileManagerButtonHtml);
-        
+
         /**
          * Inject share folder page all files direct download.
          */
         $shareFolderTheFileHr.after(shareFolderDirectDownloadAllFilesAsLinkHTML);
-        
+
         /**
          * Inject share folder page all files direct download.
          */
         $shareFolderTheFileHr.after(shareFolderDirectDownloadAllFilesHTML);
-        
+
         /**
          * Inject share folder page all files direct download links.
          */
         $body.append(directDownloadLinkOfSelectedItemsModalHtml);
-        
+
         /**
          * Inject Extra leecher Manager Button
          */
         $actionModals.append(extraLeecherManagerButtonHTML);
-        
+
         /**
          * Inject Leecher Servers Select and status.
          */
         $actionModals.append(leecherServersSelectAndStatusHTML);
-        
+
         /**
          * Inject Extra leecher manager modal
          */
         $actionModals.append(extraLeecherManagerModalHtml);
-        
+
         /**
          * Inject direct download link of sharefolder each items
          */
@@ -881,7 +881,7 @@
             $(this).find('.btn-group').prepend(directDownloadLink);
             $(this).find('.btn-group').prepend(downloadItemIndex);
         });
-        
+
         console.log('Register UI elements events.');
         /**
          * Click on line separated urls leech button event.
@@ -894,28 +894,28 @@
             });
             $lineSeparatedUrlsLeechModal.modal('show');
         });
-        
+
         /**
          * Focus on single leech input text
          */
         $('.leech-modal').on('shown.bs.modal', function () {
             $('#fileAddress').select();
         });
-        
+
         /**
          * Focus on new folder input text
          */
         $('.new-folder-modal').on('shown.bs.modal', function () {
             $('#folderName').select();
         });
-        
+
         /**
          * Focus on rename input text
          */
         $('.rename-modal').on('shown.bs.modal', function () {
             $('#fileName').select();
         });
-        
+
         /**
          * Click on internet download manager (IDM) exported text file to leech button event.
          */
@@ -923,7 +923,7 @@
             console.log('Open internet download manager (IDM) exported text file to leech modal.');
             $('#idm_export_as_text_to_leech_modal').modal('show');
         });
-        
+
         /**
          * Submit line separated urls leech event.
          */
@@ -931,7 +931,7 @@
             console.log('Submit line separated urls leech.');
             submitLineSeparatedUrlsLeechTextarea();
         });
-        
+
         /**
          * Submit internet download manager (IDM) exported text file to leech event.
          */
@@ -939,7 +939,7 @@
             console.log('Submit internet download manager (IDM) exported text file to leech.');
             submitIdmExportAsTextToLeechInput();
         });
-        
+
         /**
          * Choose internet download manager (IDM) exported text file change input event.
          */
@@ -949,7 +949,7 @@
                 $('#chosen_idm_export_as_text_to_leech_file_name').html('فایل انتخاب شده: ' + file.name);
             }
         });
-        
+
         /**
          * Click on manage leech items list button event.
          */
@@ -957,7 +957,7 @@
             console.log('Open manage leech items list modal.');
             $('#manage_leech_items_list_modal').modal('show');
         });
-        
+
         /**
          * Click on clear leech items list event.
          */
@@ -965,7 +965,7 @@
             console.log('Clear leech items list.');
             doClearLeechItemsList();
         });
-        
+
         /**
          * Click on remove item form leech items list event.
          */
@@ -977,7 +977,7 @@
             removeItemFromLeechItemsQueueList(itemGUID);
             renderManageLeechItemsListTable();
         });
-        
+
         /**
          * Click on add item to leech items queue event.
          */
@@ -993,7 +993,7 @@
             }
             renderManageLeechItemsListTable();
         });
-        
+
         /**
          * Click on direct download selected items button event.
          */
@@ -1001,7 +1001,7 @@
             console.log('Handle direct download selected items');
             handleDirectDownloadSelectedItems();
         });
-        
+
         /**
          * Click on get direct download list export to txt.
          */
@@ -1010,7 +1010,7 @@
             const blob = new Blob([directDownloadLinksList.join('\n')], { type: 'text/plain;charset=utf-8' });
             saveAs(blob, generateGUID() + '.txt');
         });
-        
+
         /**
          * Click on direct download link of selected items button event.
          */
@@ -1020,7 +1020,7 @@
             directDownloadLinksList = [];
             handleDirectDownloadLinkOfSelectedItems();
         });
-        
+
         /**
          * Click on direct download selected items button event.
          */
@@ -1029,7 +1029,7 @@
             handleRefreshUsedSpace();
             handleRefreshFileManager();
         });
-        
+
         /**
          * Click on share folder direct download of all files button event.
          */
@@ -1037,7 +1037,7 @@
             console.log('Handle share folder direct download of all files.');
             handleShareFolderDirectDownloadOfAllFiles();
         });
-        
+
         /**
          * Click on direct download link of sharefolder all files.
          */
@@ -1047,7 +1047,7 @@
             directDownloadLinksList = [];
             handleShareFolderDirectDownloadLinkOfAllFiles();
         });
-        
+
         /**
          * Click on direct download link of one item in share folder.
          */
@@ -1056,7 +1056,7 @@
             console.log('Handle direct download of one item in sharefolder.');
             handleShareFolderDirectDownloadOfItem($(event.currentTarget).attr('href'));
         });
-        
+
         /**
          * Click on extra leecher manager button.
          */
@@ -1065,7 +1065,7 @@
             console.log('Extra leecher manager opening.');
             $('#extra_leecher_manager_modal').modal('show');
         });
-        
+
         /**
          * Handle instagram leech button click
          */
@@ -1074,7 +1074,7 @@
             $(this).attr('disabled', 'disabled');
             handleInstagramLeech();
         });
-        
+
         /**
          * Handle leecher server click on button
          */
@@ -1083,7 +1083,7 @@
             console.log('Handle Leecher Server Button Click');
             handleLeecherServerSelect($(event.target).attr('data-id'));
         });
-        
+
         /**
          * Handle leecher server status refresh click
          */
@@ -1091,7 +1091,7 @@
             event.preventDefault();
             console.log('Refresh leecher server statuses');
             const $this = $(this);
-            
+
             $this.find('i').addClass('glyphicon-refresh-animate ');
             setTimeout(function () {
                 checkServerStatuses(function () {
@@ -1099,7 +1099,7 @@
                 });
             }, 500);
         });
-    
+
         /**
          * Handle mouseover on leech server status manager box
          */
@@ -1108,52 +1108,52 @@
                 $(this).find('.animated-button').stop().fadeTo(300, 1);
             }
         });
-    
+
         /**
          * Handle mouseout on leech server status manager box
          */
         $body.on('mouseout', '.leecher-server', function () {
-                $(this).find('.animated-button').stop().fadeTo(200, 0);
+            $(this).find('.animated-button').stop().fadeTo(200, 0);
         });
-    
+
         /**
          * Handle cancle the leech server file leeching
          */
         $body.on('click', '.cancle-button', function () {
             const server_id = $(this).attr('data-id');
-            if(shatellandLeecherServers.hasOwnProperty(server_id)) {
+            if (shatellandLeecherServers.hasOwnProperty(server_id)) {
                 $.get(shatellandLeecherServers[server_id].currentUserAddress + '/cancel').then(function () {
                     handleCurrentLeecherServersFileStatus(server_id);
-                }).fail( function (e) {
+                }).fail(function (e) {
                     console.log(e);
                 });
             }
         });
-        
+
         /**
          * All the functionality that we needed.
          */
-        
+
         /**
          * When StoreJS loaded, Retrieve saved data form LocalStorage
          */
         function storeJsLoaded() {
             console.log('Store.js loaded.');
-            
+
             console.log('Retrieve leecher items list.');
             if (store.get(LEECHER_ITEMS_LIST_KEY)) {
                 leecherItemsList = store.get(LEECHER_ITEMS_LIST_KEY);
             } else {
                 store.set(LEECHER_ITEMS_LIST_KEY, leecherItemsList);
             }
-            
+
             console.log('Retrieve leecher items queue list.');
             if (store.get(LEECHER_ITEMS_QUEUE_LIST_KEY)) {
                 leecherItemsQueueList = store.get(LEECHER_ITEMS_QUEUE_LIST_KEY);
             } else {
                 store.set(LEECHER_ITEMS_QUEUE_LIST_KEY, leecherItemsQueueList);
             }
-            
+
             console.log('Retrieve leecher server id.');
             if (store.get(LEECHER_SERVER_ID_KEY)) {
                 leecherServerId = store.get(LEECHER_SERVER_ID_KEY);
@@ -1161,10 +1161,10 @@
                 store.set(LEECHER_SERVER_ID_KEY, 'dl1');
             }
             checkServerStatuses();
-            
+
             renderManageLeechItemsListTable();
         }
-        
+
         /**
          * Generate GUID
          * @returns {string}
@@ -1172,13 +1172,13 @@
         function generateGUID() {
             function s4() {
                 return Math.floor((1 + Math.random()) * 0x10000)
-                           .toString(16)
-                           .substring(1);
+                    .toString(16)
+                    .substring(1);
             }
-            
+
             return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
         }
-        
+
         /**
          * Convert line separated urls string to array.
          * @param lineSeparatedUrls
@@ -1188,10 +1188,10 @@
             if (typeof lineSeparatedUrls == 'string') {
                 return lineSeparatedUrls.split('\n');
             }
-            
+
             return [];
         }
-        
+
         /**
          * Get current folder id using the window location
          * @returns {number}
@@ -1203,10 +1203,10 @@
                 const urlPaths = urlParser.hash.split('/');
                 folderId = urlPaths[urlPaths.length - 1];
             }
-            
+
             return folderId;
         }
-        
+
         /**
          * Add array of urls to leech list
          * @param urlsArray {Array}
@@ -1214,7 +1214,7 @@
          */
         function addUrlsArrayToLeechList(urlsArray, callback) {
             const currentFolderId = getCurrentFolderId();
-            
+
             for (let urlIndex in urlsArray) {
                 if (urlsArray.hasOwnProperty(urlIndex)) {
                     if (typeof urlsArray[urlIndex] == 'string' && urlsArray[urlIndex] !== '') {
@@ -1224,7 +1224,7 @@
                             folderId: currentFolderId,
                             status: LEECH_FILE_STATUS.NOT_SUBMITTED
                         };
-                        
+
                         let fileNotAdded = true;
                         let fileGUID = '';
                         while (fileNotAdded) {
@@ -1245,7 +1245,7 @@
             renderManageLeechItemsListTable();
             callback();
         }
-        
+
         /**
          * Submit line separated urls to leech textarea
          */
@@ -1264,7 +1264,7 @@
                 });
             }
         }
-        
+
         /**
          * Submit internet download manager (IDM) exported text file to leech input
          */
@@ -1272,7 +1272,7 @@
             const $idmExportAsTextToLeechInput = $('#idm_export_as_text_to_leech_input'),
                 idmExportAsTextToLeechFile = $idmExportAsTextToLeechInput.get(0).files[0],
                 fileReader = new FileReader(), fileExtensionRegex = /(?:\.([^.]+))?$/;
-            
+
             fileReader.onload = function (event) {
                 const lineSeparatedUrlsLeechArray = convertLineSeparatedUrlsToArray(event.target.result);
                 console.log('Add urls array from internet download manager (IDM) exported text file to leech input.');
@@ -1283,9 +1283,9 @@
                         text: 'فایل ها برای انتقال ارسال شد.'
                     });
                 });
-                
+
             };
-            
+
             if (idmExportAsTextToLeechFile) {
                 console.log('Check internet download manager (IDM) exported text file to leech input file is txt.');
                 if (fileExtensionRegex.exec(idmExportAsTextToLeechFile.name)[1] == 'txt') {
@@ -1304,7 +1304,7 @@
                 });
             }
         }
-        
+
         /**
          * Render manage leech items list table.
          */
@@ -1321,7 +1321,7 @@
                 } else if (upload.status == 2) {
                     //uploadHTML += '<td>خطا در ارسال</td>';
                     //uploadHTML += '<td><span data-guid="' + uploadGUID + '" class="btn btn-primary add-item-to-leech-items-queue-again">دوباره</span></td>';
-                    
+
                 }
                 if (upload.status == LEECH_FILE_STATUS.SUBMIT_SUCCESS) {
                     uploadHTML += '<td>ارسال شده</td>';
@@ -1331,7 +1331,7 @@
                 $leechItemsListTableTbody.prepend(uploadHTML);
             }
         }
-        
+
         /**
          * Clear leech items list.
          */
@@ -1344,7 +1344,7 @@
             store.set(LEECHER_ITEMS_QUEUE_LIST_KEY, []);
             renderManageLeechItemsListTable();
         }
-        
+
         /**
          * Remove an item from leech items list
          */
@@ -1355,7 +1355,7 @@
                 store.set(LEECHER_ITEMS_LIST_KEY, leecherItemsList);
             }
         }
-        
+
         /**
          * Remove an item from leech items queue list
          */
@@ -1366,7 +1366,7 @@
                 store.set(LEECHER_ITEMS_QUEUE_LIST_KEY, leecherItemsQueueList);
             }
         }
-        
+
         /**
          * Start leech queue submit.
          */
@@ -1398,7 +1398,7 @@
                 isSubmittingLeecherQueue = false;
             }
         }
-        
+
         /**
          * Submit item to Leech.
          */
@@ -1406,7 +1406,7 @@
             console.log('Submitting item to leecher: ' + itemUrl + ' ' + itemFolderId);
             const leechHub = new SocketEngine("ws://namava.ir:8090", true);
             const myClientId = leechHub.connectionId;
-    
+
             getLeecherServerStatus(leecherServerId).done(function (data) {
                 if (data !== null) {
                     console.log('Currently leeching item.');
@@ -1437,7 +1437,7 @@
                 callback('error');
             });
         }
-        
+
         /*
         function leechModalManager() {
             const mainControllerScope = $('#sh-upload-center').scope();
@@ -1476,18 +1476,18 @@
             });
         }
         */
-        
+
         /**
          * Handle direct download selected items.
          */
         function handleDirectDownloadSelectedItems() {
             const currentFolderId = getCurrentFolderId();
-            
+
             const selectedFilesAndFolders = getSelectedFilesAndFolders();
-            
+
             console.log('Selected Files: ' + selectedFilesAndFolders.files);
             console.log('Selected Folders: ' + selectedFilesAndFolders.folders);
-            
+
             if (selectedFilesAndFolders.files.length > 0) {
                 getFolderArchiveContext(currentFolderId, function (folderArchiveContext) {
                     console.log('Direct downloading of selected files in folder: ' + folderArchiveContext);
@@ -1497,7 +1497,7 @@
                     }
                 });
             }
-            
+
             if (selectedFilesAndFolders.folders.length > 0) {
                 for (let selectedFolderIndex in selectedFilesAndFolders.folders) {
                     const folderId = selectedFilesAndFolders.folders[selectedFolderIndex];
@@ -1505,22 +1505,22 @@
                     getFolderArchiveContext(folderId, function (folderArchiveContext) {
                         directDownloadFolderFiles(folderArchiveContext);
                     });
-                    
+
                 }
             }
         }
-        
+
         /**
          * Handle direct download link of selected items
          */
         function handleDirectDownloadLinkOfSelectedItems() {
             const currentFolderId = getCurrentFolderId();
-            
+
             const selectedFilesAndFolders = getSelectedFilesAndFolders();
-            
+
             console.log('Selected Files: ' + selectedFilesAndFolders.files);
             console.log('Selected Folders: ' + selectedFilesAndFolders.folders);
-            
+
             if (selectedFilesAndFolders.files.length > 0) {
                 getFolderArchiveContext(currentFolderId, function (folderArchiveContext) {
                     console.log('Direct downloading of selected files in folder: ' + folderArchiveContext);
@@ -1533,7 +1533,7 @@
                     }
                 });
             }
-            
+
             if (selectedFilesAndFolders.folders.length > 0) {
                 for (let selectedFolderIndex in selectedFilesAndFolders.folders) {
                     const folderId = selectedFilesAndFolders.folders[selectedFolderIndex];
@@ -1546,13 +1546,13 @@
                                 renderDirectDownloadListModal();
                             });
                         }
-                        
+
                     });
-                    
+
                 }
             }
         }
-    
+
         /**
          * Render Direct Download List Modal
          */
@@ -1562,19 +1562,19 @@
             $directDownloadListListularTBody.html('');
             $directDownloadListTextularText.val(directDownloadLinksList.join('\n'));
             console.log(directDownloadLinksList.join('\n'));
-            
+
             for (var directDownloadLinkIndex in directDownloadLinksList) {
                 $directDownloadListListularTBody.append('<tr><td style="direction: ltr;text-align: left;"><a href="' + directDownloadLinksList[directDownloadLinkIndex] + '">' + directDownloadLinksList[directDownloadLinkIndex] + '</a></td></tr>');
             }
-            
+
         }
-        
+
         /**
          * Get selected files and folders
          */
         function getSelectedFilesAndFolders() {
             const selectedItems = $('.fm-item.ui-selected');
-            
+
             let selectedFolders = [], selectedFiles = [];
             $.each(selectedItems, function () {
                 if ($(this).hasClass('file')) {
@@ -1588,7 +1588,7 @@
                 folders: selectedFolders
             };
         }
-        
+
         /**
          * Get folder archive context
          */
@@ -1598,7 +1598,7 @@
                 callback(data);
             });
         }
-        
+
         /**
          * Get download page url of file.
          */
@@ -1618,10 +1618,10 @@
                     pageUrl = 'http://' + requestUrlPrefix + 'shatelland.com/upload' + fileLink;
                 }
             }
-            
+
             return pageUrl;
         }
-        
+
         /**
          * Start direct download of file by its download page url.
          * @param fileDownloadPageUrl
@@ -1629,7 +1629,7 @@
         function startDirectDownloadOfFileByPageUrl(fileDownloadPageUrl) {
             getFileDirectDownloadUrlByDownloadPageUrl(fileDownloadPageUrl, function (downloadDirectUrl) {
                 console.log('Direct downloading of file: ' + downloadDirectUrl);
-                
+
                 if (downloadDirectUrl) {
                     const $iframe = $('<iframe class="file-direct-download-iframe" src="' + downloadDirectUrl + '"></iframe>');
                     $('body').append($iframe);
@@ -1641,19 +1641,24 @@
                 }
             });
         }
-        
+
         /**
          * Get file direct download url by download page url
          */
         function getFileDirectDownloadUrlByDownloadPageUrl(fileDownloadPageUrl, callback) {
-            $.get(fileDownloadPageUrl, function (data) {
+            $.get(fileDownloadPageUrl).success(function (data) {
                 const downloadDirectUrlRegex = /id="downloadFile" href="(.*)" /i;
                 const downloadDirectUrl = downloadDirectUrlRegex.exec(data)[1];
-                
+
+                callback(downloadDirectUrl);
+            }).fail(function (jqXHR) {
+                const downloadDirectUrlRegex = /id="downloadFile" href="(.*)" /i;
+                const downloadDirectUrl = downloadDirectUrlRegex.exec(jqXHR.responseText)[1];
+
                 callback(downloadDirectUrl);
             });
         }
-        
+
         /**
          * Direct download of whole folder
          */
@@ -1663,7 +1668,7 @@
                 startDirectDownloadOfFileByPageUrl(files[fileIndex].pageUrl);
             }
         }
-        
+
         /**
          * Get folder files page url
          * @param folderArchiveContext
@@ -1688,23 +1693,23 @@
             }
             return files;
         }
-        
+
         /**
          * Handle Refresh Used Space
          */
         function handleRefreshUsedSpace() {
             console.log('Refresh Used Space');
             const injector = $('body').injector(), $timeout = injector.get('$timeout');
-            
+
             var scope = $('.progressLimit').scope();
             scope.reloadUserAccountInfo();
-            
+
             $timeout(function () {
                 scope.$apply(function () {
                 });
             }, 0);
         }
-        
+
         /**
          * Handle refresh file manager
          */
@@ -1712,16 +1717,16 @@
             const currentFolderId = getCurrentFolderId(), injector = $('body').injector(),
                 FileSystemRegistry = injector.get('UploadCenter.Service.FileSystemRegistry'),
                 $timeout = injector.get('$timeout');
-            
+
             let index = FileSystemRegistry.fetchedFolders.indexOf(currentFolderId);
             if (index > -1) {
                 FileSystemRegistry.fetchedFolders.splice(index, 1);
             }
-            
+
             if (FileSystemRegistry._reg_data.hasOwnProperty(currentFolderId)) {
                 delete FileSystemRegistry._reg_data[currentFolderId];
             }
-            
+
             FileSystemRegistry.setData(currentFolderId, function () {
                 var scope = $('.file-manager-header').next().scope();
                 $timeout(function () {
@@ -1730,25 +1735,25 @@
                     });
                 }, 0);
             });
-            
+
         }
-        
+
         /**
          * Handle share folder direct download of all files.
          */
         function handleShareFolderDirectDownloadOfAllFiles() {
             const $files = $('.the-file ul li');
-            
+
             $.each($files, function () {
                 if (requestUrlPrefix == 'www.') {
                     startDirectDownloadOfFileByPageUrl($(this).find('a').attr('href'));
                 } else {
                     startDirectDownloadOfFileByPageUrl($(this).find('a').attr('href').replace('www.', ''));
                 }
-                
+
             });
         }
-        
+
         /**
          * Handle share folder direct download of all files as link.
          */
@@ -1765,7 +1770,7 @@
                 });
             });
         }
-        
+
         /**
          * Handle share folder direct download of all files as link.
          */
@@ -1776,7 +1781,7 @@
                 startDirectDownloadOfFileByPageUrl(url.replace('www.', ''));
             }
         }
-        
+
         /**
          * Handle Instagram Leech.
          */
@@ -1785,7 +1790,7 @@
             const $instagramLeecherInput = $('#instagram_leecher_input');
             const $instagramLeecherStatus = $('#instagram_leecher_status');
             const $doInstagramLeechButton = $('#do_instagram_leech');
-            
+
             const share_url = $instagramLeecherInput.val();
             console.log('Instagram Share URL: ' + share_url);
             if (share_url) {
@@ -1868,19 +1873,19 @@
                 $doInstagramLeechButton.prop("disabled", false);
             }
         }
-        
+
         /**
          * Check shatelland leecher servers status.
          */
         let count = 0;
-        
+
         function checkServerStatuses(callback) {
             for (let serverId in shatellandLeecherServers) {
                 checkServerById(serverId, callback);
             }
             renderLeecherServersSelectAndStatus();
         }
-        
+
         function checkServerById(serverId, callback) {
             $.ajax({
                 type: "GET",
@@ -1896,7 +1901,7 @@
                     } else {
                         shatellandLeecherServers[serverId].status = 0;
                     }
-                    
+
                     renderLeecherServersSelectAndStatus();
                     if (count == Object.keys(shatellandLeecherServers).length) {
                         if (callback) {
@@ -1906,7 +1911,7 @@
                 }
             });
         }
-        
+
         /**
          * Render Server status and select
          */
@@ -1916,16 +1921,16 @@
             html += `<span class="btn btn-default refresh-server-statuses"><i class="glyphicon glyphicon-refresh"></i></span>`;
             for (let serverId in shatellandLeecherServers) {
                 html += `
-                    <span class="btn btn-default leecher-server-button server-${serverId} ${shatellandLeecherServers[serverId].status ? 'btn-success' : 'btn-danger'}${(serverId == leecherServerId ) ? ' active' : ''}" style="direction: rtl" data-id="${serverId}">
+                    <span class="btn btn-default leecher-server-button server-${serverId} ${shatellandLeecherServers[serverId].status ? 'btn-success' : 'btn-danger'}${(serverId == leecherServerId) ? ' active' : ''}" style="direction: rtl" data-id="${serverId}">
                         ${shatellandLeecherServers[serverId].text}
-                        ${(serverId == leecherServerId ) ? ' <i class="glyphicon glyphicon-ok"></i>' : ''}
+                        ${(serverId == leecherServerId) ? ' <i class="glyphicon glyphicon-ok"></i>' : ''}
                     </span>
                 `;
             }
-            
+
             $leecherServersSelectWrapper.html(html);
         }
-        
+
         /**
          * Change server button click.
          * @param serverId
@@ -1938,14 +1943,14 @@
                 renderLeecherServersSelectAndStatus();
             }
         }
-    
+
         /**
          * Render current leecher server status that are bottom of page
          */
         function renderCurrentLeecherServerFilesManager() {
             console.log('Render current leecher server files manager for first time.');
             $body.append(currentLeecherServerFilesManagerHtml);
-            
+
             for (const server_id in shatellandLeecherServers) {
                 $('#current_leecher_server_files_manager').append(`
                     <div class="leecher-server no-file" id="leecher_server_file_${server_id}">
@@ -1976,26 +1981,26 @@
             $('[data-toggle="tooltip"]').tooltip();
             handleCurrentLeecherServersFileStatus();
         }
-    
+
         /**
          * Handle current leecher servers file status
          * @param server_id
          */
         function handleCurrentLeecherServersFileStatus(server_id) {
             console.log('Render current leecher servers file status.')
-            if(server_id) {
-                if(!shatellandLeecherServers[server_id].interval) {
+            if (server_id) {
+                if (!shatellandLeecherServers[server_id].interval) {
                     handleCurrentLeecherServerFileStatus(server_id);
                 }
             } else {
                 for (const server_id in shatellandLeecherServers) {
-                    if(!shatellandLeecherServers[server_id].interval) {
+                    if (!shatellandLeecherServers[server_id].interval) {
                         handleCurrentLeecherServerFileStatus(server_id);
                     }
                 }
             }
         }
-    
+
         /**
          * Handle current leecher server file status
          * @param server_id
@@ -2020,18 +2025,18 @@
                 console.log('Getting leech server file status error');
             });
         }
-    
+
         /**
          * Render current leecher server file status
          * @param server_id
          * @param data
          */
         function renderCurrentLeecherServerFileStatus(server_id, data) {
-            console.log('Render current leecher server '+ server_id +' file status.')
+            console.log('Render current leecher server ' + server_id + ' file status.')
             if (data !== null) {
                 $('#leecher_server_file_' + server_id).removeClass('no-file');
                 $('#leecher_server_file_' + server_id).find('.file-address-input').attr('value', data.Info.Url);
-                if(data.Info.Percentage > 0) {
+                if (data.Info.Percentage > 0) {
                     data.Info.Percentage /= 100;
                 } else {
                     data.Info.Percentage = 0;
@@ -2043,7 +2048,7 @@
                 $('#leecher_server_file_' + server_id).find('.circle-progress').circleProgress('value', 0);
             }
         }
-    
+
         /**
          * Get leecher server status by id
          * @param server_id
@@ -2053,7 +2058,7 @@
             return $.get(shatellandLeecherServers[server_id].currentUserAddress);
         }
     };
-    
+
     /**
      * Inject main script to page.
      *
@@ -2066,5 +2071,5 @@
     mainScript.type = "text/javascript";
     mainScript.textContent = '(' + ShatellandAdvancedFeaturesMain.toString() + ')();';
     document.body.appendChild(mainScript);
-    
+
 })();
