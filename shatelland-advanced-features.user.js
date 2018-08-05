@@ -753,9 +753,11 @@
          */
         const urlParser = document.createElement('a');
         urlParser.href = window.location.href;
-        if (urlParser.protocol == 'https:') {
-            window.location.href = 'http:' + window.location.href.substring(window.location.protocol.length);
+        /* No needed any more. The site redirected to https by default.
+        if (urlParser.protocol == 'http:') {
+            window.location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
         }
+        */
 
         /**
          * Check url contains www or not?
