@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Shatelland Upload Center Advanced Features
 // @namespace    http://allii.ir/
-// @version      3.5.1
+// @version      3.5.3
 // @description  Add new and advanced features to Shatelland upload center
 // @author       Alireza Dabiri Nejad | alireza.dabirinejad@live.com | http://allii.ir
 // @include      http*://*shatelland.com/upload*
