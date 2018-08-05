@@ -97,7 +97,7 @@
             },
             dl4: {
                 text: 'DL4',
-                address: 'http://dl4.shatelland.com/api/Leech',
+                address: 'https://dl4.shatelland.com/api/Leech',
                 currentUserAddress: 'https://dl4.shatelland.com/api/LeechManager/currentuser',
                 status: 0,
                 interval: 0
@@ -1596,7 +1596,7 @@
          */
         function getFolderArchiveContext(folderId, callback) {
             console.log('Getting folder archive context: ' + folderId);
-            $.get('http://' + requestUrlPrefix + 'shatelland.com/api/Archive/GetUserArchiveContext/' + folderId + '/0', function (data) {
+            $.get('https://' + requestUrlPrefix + 'shatelland.com/api/Archive/GetUserArchiveContext/' + folderId + '/0', function (data) {
                 callback(data);
             });
         }
@@ -1617,7 +1617,7 @@
                             break;
                         }
                     }
-                    pageUrl = 'http://' + requestUrlPrefix + 'shatelland.com/upload' + fileLink;
+                    pageUrl = 'https://' + requestUrlPrefix + 'shatelland.com/upload' + fileLink;
                 }
             }
 
@@ -1690,7 +1690,7 @@
                             break;
                         }
                     }
-                    files.push({ pageUrl: 'http://' + requestUrlPrefix + 'shatelland.com/upload' + fileLink });
+                    files.push({ pageUrl: 'https://' + requestUrlPrefix + 'shatelland.com/upload' + fileLink });
                 }
             }
             return files;
